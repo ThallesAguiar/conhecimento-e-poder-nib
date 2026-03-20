@@ -1141,6 +1141,12 @@
     /* ══════════════════════════════════════════════
        DATA
     ══════════════════════════════════════════════ */
+    // Configuração dinâmica das categorias (gerada pela IA)
+    const CONFIG = {
+      cat1: { id: 'hardware', label: 'Hardware', icon: '💻' },
+      cat2: { id: 'software', label: 'Software', icon: '💿' }
+    };
+
     const ITEMS = [
       {
         name: "Memória RAM", icon: "🧠", type: "hardware",
@@ -1359,9 +1365,9 @@
 
       card.classList.add(ok ? 'flash-ok' : 'flash-err');
 
-      const catLabel = q.type === 'hardware'
-        ? `<span style="color:var(--hw);font-family:'Orbitron',sans-serif">HARDWARE</span>`
-        : `<span style="color:var(--sw);font-family:'Orbitron',sans-serif">SOFTWARE</span>`;
+      // Detecta qual é a categoria correta para exibir no feedback
+      const correctInfo = q.type === CONFIG.cat1.id ? CONFIG.cat1 : CONFIG.cat2;
+      const catLabel = `<span style="color:var(--hw);font-family:'Orbitron',sans-serif">${correctInfo.label.toUpperCase()}</span>`;
 
       if (ok) {
         Swal.fire({
@@ -1382,13 +1388,10 @@
           }
         });
       } else {
-        const correct = q.type === 'hardware'
-          ? `<span style="color:var(--hw);font-family:'Orbitron',sans-serif">HARDWARE</span>`
-          : `<span style="color:var(--sw);font-family:'Orbitron',sans-serif">SOFTWARE</span>`;
         Swal.fire({
           icon: 'error', iconColor: '#ff1744',
           title: '❌ Não foi dessa vez!',
-          html: `<strong style="font-family:'Orbitron',sans-serif;font-size:1.1rem">${q.name}</strong> é ${correct}<br><br><span style="color:rgba(220,232,248,.75)">${q.err}</span>`,
+          html: `<strong style="font-family:'Orbitron',sans-serif;font-size:1.1rem">${q.name}</strong> é ${catLabel}<br><br><span style="color:rgba(220,232,248,.75)">${q.err}</span>`,
           confirmButtonText: current + 1 < shuffled.length ? 'ENTENDI, CONTINUAR ›' : 'VER MEU DESEMPENHO ›',
           confirmButtonColor: '#5c6bc0',
           allowOutsideClick: false,
@@ -1695,6 +1698,17 @@
     function launchGame() {
       const overlay = document.getElementById('splash-overlay');
       const controls = document.getElementById('game-controls');
+      const btnArea = controls.querySelector('.btn-area');
+
+      // Gera os botões dinamicamente conforme a CONFIG
+      btnArea.innerHTML = `
+        <button class="btn-choice btn-hw" id="btn-cat1" onclick="answer('${CONFIG.cat1.id}')">
+          <span class="btn-emoji">${CONFIG.cat1.icon}</span>${CONFIG.cat1.label.toUpperCase()}
+        </button>
+        <button class="btn-choice btn-sw" id="btn-cat2" onclick="answer('${CONFIG.cat2.id}')">
+          <span class="btn-emoji">${CONFIG.cat2.icon}</span>${CONFIG.cat2.label.toUpperCase()}
+        </button>
+      `;
 
       // Animate overlay out
       overlay.classList.add('hiding');
@@ -1706,6 +1720,13 @@
 
       // Start timer NOW (not before)
       startTimer();
+    }
+
+    function setButtons(disabled) {
+      const b1 = document.getElementById('btn-cat1');
+      const b2 = document.getElementById('btn-cat2');
+      if (b1) b1.disabled = disabled;
+      if (b2) b2.disabled = disabled;
     }
   </script>
 </body>
