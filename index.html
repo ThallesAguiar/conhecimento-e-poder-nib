@@ -1694,15 +1694,56 @@
     ══════════════════════════════════════════════ */
     window.addEventListener('DOMContentLoaded', () => {
       if (!checkAlreadyPlayed()) {
-        prepGame(); // shuffle + load first question silently, wait for click
+        prepGame(); // shuffle + load first question
+        showInstructions(); // Mostra as instruções ao abrir
       }
     });
 
+    /* ── Show Instructions on Load ── */
+    async function showInstructions() {
+      const temaFormatado = TEMA.replace(/_/g, ' ').toUpperCase();
+      
+      await Swal.fire({
+        title: `⚡ BEM-VINDO AO DESAFIO: ${temaFormatado}`,
+        html: `
+          <div style="text-align:left; font-family:'Rajdhani',sans-serif; font-size:1.05rem; line-height:1.5;">
+            <p>Olá! Prepare-se para testar seus conhecimentos. Aqui estão as regras:</p>
+            <ul style="color:var(--hw); margin-bottom:1.2rem;">
+              <li><strong>Foco no Aprendizado:</strong> Após cada resposta, leia a explicação detalhada com calma. O objetivo é que você aprenda o conteúdo!</li>
+              <li><strong>Objetivo:</strong> Tente acertar o máximo possível de questões.</li>
+              <li><strong>Interação:</strong> Use os botões dinâmicos abaixo do card para responder cada item.</li>
+            </ul>
+            <p style="text-align:center; color:var(--sw); font-weight:600; letter-spacing:1px;">O quiz entrará em TELA CHEIA para melhor experiência.</p>
+          </div>`,
+        confirmButtonText: 'ESTOU PRONTO! 🚀',
+        confirmButtonColor: '#5c6bc0',
+        allowOutsideClick: false,
+        background: '#0d1117',
+        showClass: { popup: 'swal2-show' }
+      });
+
+      // Ativa tela cheia e COMEÇA O JOGO
+      launchGame();
+    }
+
     /* ── Play button click ── */
     function launchGame() {
+      // Solicita modo tela cheia (permitido após o clique do SweetAlert)
+      const docEl = document.documentElement;
+      if (!document.fullscreenElement) {
+        if (docEl.requestFullscreen) {
+          docEl.requestFullscreen().catch(err => console.log("Fullscreen negado"));
+        } else if (docEl.webkitRequestFullscreen) {
+          docEl.webkitRequestFullscreen();
+        }
+      }
+
       const overlay = document.getElementById('splash-overlay');
       const controls = document.getElementById('game-controls');
       const btnArea = controls.querySelector('.btn-area');
+
+      // Se o overlay já sumiu, não faz nada
+      if (overlay.style.display === 'none' || overlay.classList.contains('hiding')) return;
 
       // Gera os botões dinamicamente conforme a CONFIG
       btnArea.innerHTML = `
