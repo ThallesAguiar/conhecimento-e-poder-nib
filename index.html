@@ -1581,6 +1581,25 @@
       }
     }, 30000);
 
+    function onTurmaFilterChange(source) {
+      const selId = source === 'all' ? 'turma-filter-all' : 'turma-filter';
+      const otherId = source === 'all' ? 'turma-filter' : 'turma-filter-all';
+
+      const sel = document.getElementById(selId);
+      const otherSel = document.getElementById(otherId);
+
+      if (sel) {
+        rankingTurmaFilter = sel.value;
+        if (otherSel) otherSel.value = sel.value; // Sincroniza o outro select
+
+        // Invalidate cache
+        delete rankingCache['diario'];
+        delete rankingCache['geral'];
+
+        refreshActiveRanking();
+      }
+    }
+
     async function loadRanking(tipo, force = false) {
       const contentId = tipo === 'diario' ? 'daily-content' : 'all-content';
       const el = document.getElementById(contentId);
@@ -1590,24 +1609,8 @@
         el.innerHTML = rankingCache[cacheKey].html;
         return;
       }
-      function onTurmaFilterChange(source) {
-        const selId = source === 'all' ? 'turma-filter-all' : 'turma-filter';
-        const otherId = source === 'all' ? 'turma-filter' : 'turma-filter-all';
 
-        const sel = document.getElementById(selId);
-        const otherSel = document.getElementById(otherId);
-
-        if (sel) {
-          rankingTurmaFilter = sel.value;
-          if (otherSel) otherSel.value = sel.value; // Sincroniza o outro select
-
-          // Invalidate cache
-          delete rankingCache['diario'];
-          delete rankingCache['geral'];
-
-          refreshActiveRanking();
-        }
-      } el.innerHTML = '<div class="rank-loading">⏳ Carregando...</div>';
+      el.innerHTML = '<div class="rank-loading">⏳ Carregando...</div>';
 
       try {
         let url = `getRanking.php?tipo=${tipo}&tema=${TEMA}`;
@@ -1623,12 +1626,13 @@
         const html = buildRankingTable(rows);
         rankingCache[cacheKey] = { html, ts: Date.now() };
         el.innerHTML = html;
-      } catch {
+      } catch (err) {
+        console.error(err);
         el.innerHTML = `
-      <div class="rank-empty">
-        ⚠️ Não foi possível carregar o ranking.<br>
-        <small>Verifique se o servidor PHP está ativo.</small>
-      </div>`;
+          <div class="rank-empty">
+            ⚠️ Não foi possível carregar o ranking.<br>
+            <small>Verifique se o servidor PHP está ativo.</small>
+          </div>`;
       }
     }
 
