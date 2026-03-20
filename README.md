@@ -40,6 +40,19 @@ Personalize a experiência do aluno passando parâmetros via GET:
 - `turma`: Define a identificação da turma (Ex: `9A`, `INFO_BASICA`).
 - `tema`: Define o assunto do quiz para o banco de dados (Ex: `hardware_software`, `perifericos`).
 
+## ✨ Gerador de Questões (AI Prompt)
+
+Para criar novos temas rapidamente, copie e cole o prompt abaixo em uma IA (ChatGPT, Gemini, Claude). Ele gerará o código pronto para substituir no seu `index.html`:
+
+> **Prompt:** "Atue como um especialista em pedagogia e informática. Gere um quiz sobre **[INSIRA O TEMA AQUI, ex: Periféricos de Entrada vs Saída]**. 
+> O formato de saída deve conter duas constantes JavaScript:
+> 
+> 1. `const CONFIG = { cat1: { id: 'id1', label: 'Nome1', icon: 'Emoji1' }, cat2: { id: 'id2', label: 'Nome2', icon: 'Emoji2' } };`
+> 
+> 2. `const ITEMS = [ { name: 'Item', icon: 'Emoji', type: 'id1', ok: '...', err: '...' }, ... ];` (Gere 15 itens)
+> 
+> **Requisitos:** As explicações devem ser simples para alunos iniciantes. Os 'type' dos itens devem corresponder aos IDs definidos na CONFIG."
+
 ## 🔄 Fluxo do Jogo
 
 Para quem deseja entender a lógica de funcionamento do projeto:
