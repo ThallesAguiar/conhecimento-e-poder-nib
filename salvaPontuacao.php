@@ -34,6 +34,8 @@ $tema = isset($body['tema']) ? trim($body['tema']) : 'geral';
 $acertos = isset($body['acertos']) ? (int) $body['acertos'] : 0;
 $erros = isset($body['erros']) ? (int) $body['erros'] : 0;
 $tempo = isset($body['tempo_total_segundos']) ? (int) $body['tempo_total_segundos'] : 0;
+$alunoId = isset($body['aluno_id']) ? (int) $body['aluno_id'] : null;
+$respostas = isset($body['respostas']) ? $body['respostas'] : []; // Array de { questao, resposta, correta }
 
 // Validações
 if (strlen($nome) < 2 || strlen($nome) > 100) {
@@ -41,19 +43,19 @@ if (strlen($nome) < 2 || strlen($nome) > 100) {
     echo json_encode(['erro' => 'Nome inválido.']);
     exit;
 }
-if ($acertos < 0 || $acertos > 20 || $erros < 0 || $erros > 20) {
+if ($acertos < 0 || $acertos > 50 || $erros < 0 || $erros > 50) {
     http_response_code(422);
     echo json_encode(['erro' => 'Valores fora do intervalo.']);
     exit;
 }
-if ($tempo < 0 || $tempo > 3600) {
+if ($tempo < 0 || $tempo > 7200) {
     http_response_code(422);
     echo json_encode(['erro' => 'Tempo inválido.']);
     exit;
 }
 
 // Sanitiza turma e tema
-$turma = preg_replace('/[^a-zA-Z0-9\-_]/', '', $turma);
+$turma = preg_replace('/[^a-zA-Z0-9\-_ ]/', '', $turma);
 $turma = substr($turma ?: 'sem_turma', 0, 30);
 $tema = preg_replace('/[^a-zA-Z0-9\-_]/', '', $tema);
 $tema = substr($tema ?: 'geral', 0, 50);
@@ -66,12 +68,6 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
     );
 
-    // Garantia extra: Cria a coluna tema se ela não existir (auto-correção)
-    try {
-        $pdo->exec("ALTER TABLE pontuacoes ADD COLUMN tema VARCHAR(50) NOT NULL DEFAULT 'geral' AFTER turma");
-        $pdo->exec("ALTER TABLE pontuacoes ADD INDEX idx_tema (tema)");
-    } catch (Exception $e) { /* Coluna já existe, ignora */ }
-
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['erro' => 'Erro de conexão: ' . $e->getMessage()]);
@@ -79,13 +75,41 @@ try {
 }
 
 try {
-    // Insert
+    $pdo->beginTransaction();
+
+    // Insert Pontuação
     $stmt = $pdo->prepare("
-        INSERT INTO pontuacoes (nome, turma, tema, acertos, erros, tempo_total_segundos)
-        VALUES (:nome, :turma, :tema, :acertos, :erros, :tempo)
+        INSERT INTO pontuacoes (aluno_id, nome, turma, tema, acertos, erros, tempo_total_segundos)
+        VALUES (:aluno_id, :nome, :turma, :tema, :acertos, :erros, :tempo)
     ");
-    $stmt->execute([':nome' => $nome, ':turma' => $turma, ':tema' => $tema, ':acertos' => $acertos, ':erros' => $erros, ':tempo' => $tempo]);
+    $stmt->execute([
+        ':aluno_id' => $alunoId,
+        ':nome' => $nome,
+        ':turma' => $turma,
+        ':tema' => $tema,
+        ':acertos' => $acertos,
+        ':erros' => $erros,
+        ':tempo' => $tempo
+    ]);
     $newId = (int) $pdo->lastInsertId();
+
+    // Salvar respostas detalhadas se existirem
+    if (!empty($respostas) && is_array($respostas)) {
+        $stmtResp = $pdo->prepare("
+            INSERT INTO respostas_detalhadas (pontuacao_id, questao_nome, resposta_aluno, correta)
+            VALUES (:pid, :qnome, :resp, :corr)
+        ");
+        foreach ($respostas as $r) {
+            $stmtResp->execute([
+                ':pid' => $newId,
+                ':qnome' => substr($r['questao'] ?? 'N/A', 0, 100),
+                ':resp' => substr($r['resposta'] ?? 'N/A', 0, 50),
+                ':corr' => !empty($r['correta']) ? 1 : 0
+            ]);
+        }
+    }
+
+    $pdo->commit();
 
     // Posição geral (apenas no tema atual)
     $stmtPos = $pdo->prepare("
