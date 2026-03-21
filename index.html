@@ -1724,7 +1724,8 @@
           ${TURMA ? '<div style="font-size:0.7rem; color:var(--hw); margin-top:5px;">Turma detectada via link: ' + TURMA + '</div>' : ''}
         `,
         focusConfirm: false,
-        allowOutsideClick: false,
+        allowOutsideClick: false, // Bloqueia clique fora
+        allowEscapeKey: false,    // BLOQUEIA TECLA ESC
         confirmButtonText: 'VALIDAR E ENTRAR 🚀',
         confirmButtonColor: '#5c6bc0',
         preConfirm: () => {
