@@ -37,29 +37,30 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
     );
 
-    // 1. Valida se o aluno existe
-    $stmt = $pdo->prepare("SELECT id FROM alunos WHERE nome = :nome AND turma = :turma LIMIT 1");
+    // 1. Valida se o aluno existe na turma informada
+    $stmt = $pdo->prepare("SELECT id, nome FROM alunos WHERE LOWER(TRIM(nome)) = LOWER(TRIM(:nome)) AND LOWER(TRIM(turma)) = LOWER(TRIM(:turma)) LIMIT 1");
     $stmt->execute([':nome' => $nome, ':turma' => $turma]);
     $aluno = $stmt->fetch();
 
     if ($aluno) {
         $alunoId = $aluno['id'];
 
-        // 2. Verifica se este aluno já respondeu ESTE tema
+        // 2. Verifica se este ID de aluno já possui pontuação salva para este tema
+        // IMPORTANTE: Verificamos pelo aluno_id, que é único e imutável
         $stmtCheck = $pdo->prepare("SELECT id FROM pontuacoes WHERE aluno_id = :aid AND tema = :tema LIMIT 1");
         $stmtCheck->execute([':aid' => $alunoId, ':tema' => $tema]);
         
         if ($stmtCheck->fetch()) {
             echo json_encode([
                 'sucesso' => false, 
-                'erro' => 'Você já realizou este desafio! Consulte o ranking para ver sua nota.',
+                'erro' => 'Você já realizou este desafio (' . $tema . ')! O sistema registrou sua participação e não permite refazer para garantir a integridade do diagnóstico.',
                 'ja_fez' => true
             ]);
         } else {
             echo json_encode(['sucesso' => true, 'aluno_id' => $alunoId]);
         }
     } else {
-        echo json_encode(['sucesso' => false, 'erro' => 'Não encontramos seu nome nesta turma. Verifique a digitação ou fale com o professor.']);
+        echo json_encode(['sucesso' => false, 'erro' => 'Dados não conferem. Verifique se seu nome e turma (' . $turma . ') estão corretos ou procure o professor.']);
     }
 
 } catch (PDOException $e) {
