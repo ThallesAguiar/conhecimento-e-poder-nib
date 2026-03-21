@@ -7,8 +7,17 @@ CREATE DATABASE IF NOT EXISTS `quiz-nib`
 
 USE `quiz-nib`;
 
+CREATE TABLE IF NOT EXISTS alunos (
+    id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nome        VARCHAR(100) NOT NULL,
+    turma       VARCHAR(30)  NOT NULL,
+    criado_em   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY  idx_nome_turma (nome, turma)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS pontuacoes (
     id                   INT UNSIGNED       AUTO_INCREMENT PRIMARY KEY,
+    aluno_id             INT UNSIGNED       NULL,
     nome                 VARCHAR(100)       NOT NULL,
     turma                VARCHAR(30)        NOT NULL DEFAULT 'sem_turma',
     tema                 VARCHAR(50)        NOT NULL DEFAULT 'geral',
@@ -19,7 +28,18 @@ CREATE TABLE IF NOT EXISTS pontuacoes (
     INDEX idx_tema  (tema),
     INDEX idx_turma (turma),
     INDEX idx_data  (criado_em),
-    INDEX idx_rank  (tema, acertos DESC, erros ASC, tempo_total_segundos ASC)
+    INDEX idx_aluno (aluno_id),
+    CONSTRAINT fk_pontuacao_aluno FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS respostas_detalhadas (
+    id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    pontuacao_id   INT UNSIGNED NOT NULL,
+    questao_nome   VARCHAR(100) NOT NULL,
+    resposta_aluno VARCHAR(50)  NOT NULL,
+    correta        BOOLEAN      NOT NULL,
+    criado_em      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_resposta_pontuacao FOREIGN KEY (pontuacao_id) REFERENCES pontuacoes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Migração: Adicionar coluna tema se não existir
