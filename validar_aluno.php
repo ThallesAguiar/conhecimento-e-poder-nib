@@ -21,8 +21,9 @@ $nome = isset($body['nome']) ? trim($body['nome']) : '';
 $turma = isset($body['turma']) ? trim($body['turma']) : '';
 $tema = isset($body['tema']) ? trim($body['tema']) : 'geral';
 
-// Sanitiza turma (permite letras, números, espaços, hifens e sublinhados)
+// Sanitiza turma e tema (permite letras, números, espaços, hifens e sublinhados)
 $turma = preg_replace('/[^a-zA-Z0-9\-_ ]/', '', $turma);
+$tema = preg_replace('/[^a-zA-Z0-9\-_ ]/', '', $tema);
 
 if (empty($nome) || empty($turma)) {
     echo json_encode(['erro' => 'Nome e Turma são obrigatórios.']);

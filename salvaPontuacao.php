@@ -57,7 +57,7 @@ if ($tempo < 0 || $tempo > 7200) {
 // Sanitiza turma e tema
 $turma = preg_replace('/[^a-zA-Z0-9\-_ ]/', '', $turma);
 $turma = substr($turma ?: 'sem_turma', 0, 30);
-$tema = preg_replace('/[^a-zA-Z0-9\-_]/', '', $tema);
+$tema = preg_replace('/[^a-zA-Z0-9\-_ ]/', '', $tema);
 $tema = substr($tema ?: 'geral', 0, 50);
 
 try {
