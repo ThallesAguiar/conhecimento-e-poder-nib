@@ -1231,6 +1231,10 @@
     let shuffled = [], current = 0, hits = 0, misses = 0;
     let answered = false, gameOver = false;
     let timerInterval = null, elapsedSeconds = 0;
+    
+    // Novas variáveis para controle pedagógico
+    let alunoId = null, nomeAluno = '', turmaAluno = '';
+    let respostasDadas = [];
 
     /* ── Params detection ── */
     const URL_PARAMS = new URLSearchParams(window.location.search);
@@ -1363,6 +1367,13 @@
       else misses++;
       updateHUD();
 
+      // REGISTRO PEDAGÓGICO: Salva o detalhamento da resposta
+      respostasDadas.push({
+        questao: q.name,
+        resposta: choice,
+        correta: ok
+      });
+
       card.classList.add(ok ? 'flash-ok' : 'flash-err');
 
       // Detecta qual é a categoria correta para exibir no feedback
@@ -1445,11 +1456,12 @@
       else if (pct >= 40) { medal = '🥉'; color = '#ff8c00'; msg = 'Você está evoluindo!'; }
       else { medal = '📚'; color = '#ff1744'; msg = 'Estude mais e tente novamente!'; }
 
-      // Show summary → ask name → submit
-      const { value: nome } = await Swal.fire({
+      // Show summary e envia automaticamente usando os dados do login
+      await Swal.fire({
         title: `${medal} Fim de Jogo!`,
         html: `
       <div style="text-align:center;font-family:'Rajdhani',sans-serif;">
+        <div style="font-family:'Orbitron',sans-serif;font-size:1.1rem;color:var(--muted);margin-bottom:.5rem">${nomeAluno}</div>
         <div style="font-family:'Orbitron',sans-serif;font-size:2.8rem;color:${color};margin:.4rem 0">${pct}%</div>
         <div style="color:rgba(220,232,248,.7);margin-bottom:1.2rem">${msg}</div>
         <div style="display:flex;justify-content:center;gap:2rem;margin-bottom:1.5rem">
@@ -1457,39 +1469,28 @@
           <div><div style="font-size:1.6rem;color:#ff1744;font-family:'Orbitron',sans-serif">${misses}</div><div style="font-size:.7rem;color:rgba(220,232,248,.4);letter-spacing:2px;text-transform:uppercase">Erros</div></div>
           <div><div style="font-size:1.6rem;color:#ffd600;font-family:'Orbitron',sans-serif">${timeStr}</div><div style="font-size:.7rem;color:rgba(220,232,248,.4);letter-spacing:2px;text-transform:uppercase">Tempo</div></div>
         </div>
-        <div style="font-size:.85rem;color:rgba(220,232,248,.5);margin-bottom:.3rem">Digite seu nome para o ranking:</div>
       </div>`,
-        input: 'text',
-        inputPlaceholder: 'Seu nome completo...',
-        inputAttributes: { maxlength: 60, autocapitalize: 'words' },
-        confirmButtonText: '📤 ENVIAR PONTUAÇÃO',
+        confirmButtonText: '📤 ENVIAR RESULTADOS',
         confirmButtonColor: '#5c6bc0',
-        allowOutsideClick: false,
-        preConfirm: (val) => {
-          if (!val || val.trim().length < 2) {
-            Swal.showValidationMessage('Por favor, insira seu nome (mínimo 2 caracteres).');
-            return false;
-          }
-          return val.trim();
-        }
+        allowOutsideClick: false
       });
 
-      if (!nome) return; // user cancelled
-
-      await submitScore(nome);
+      await submitScore();
     }
 
     /* ══════════════════════════════════════════════
        SUBMIT (Axios)
     ══════════════════════════════════════════════ */
-    async function submitScore(nome) {
+    async function submitScore() {
       const payload = {
-        nome,
+        aluno_id: alunoId,
+        nome: nomeAluno,
         tema: TEMA,
-        turma: TURMA || 'sem_turma',
+        turma: turmaAluno,
         acertos: hits,
         erros: misses,
         tempo_total_segundos: elapsedSeconds,
+        respostas: respostasDadas
       };
 
       Swal.fire({
@@ -1505,20 +1506,20 @@
 
         // Anti-cheat: lock out after successful submit
         localStorage.setItem(LS_KEY, JSON.stringify({
-          nome, acertos: hits, erros: misses,
+          nome: nomeAluno, acertos: hits, erros: misses,
           tempo: elapsedSeconds, ts: Date.now()
         }));
 
         const posGeral = data.posicao ? `${data.posicao}º` : '–';
         const posTurma = data.posicao_turma ? `${data.posicao_turma}º` : '–';
-        const turmaLabel = TURMA ? `Turma ${escHtml(TURMA)}` : 'Geral';
+        const turmaLabel = turmaAluno ? `Turma ${escHtml(turmaAluno)}` : 'Geral';
 
         await Swal.fire({
           icon: 'success', iconColor: '#00e676',
           title: '🎉 Pontuação Registrada!',
           html: `
         <div style="text-align:center">
-          <div style="font-family:'Orbitron',sans-serif;font-size:1rem;color:rgba(220,232,248,.6);margin-bottom:.8rem">Fim de jogo, <strong style="color:#fff">${nome}</strong>!</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:1rem;color:rgba(220,232,248,.6);margin-bottom:.8rem">Fim de jogo, <strong style="color:#fff">${nomeAluno}</strong>!</div>
           <div style="display:flex;justify-content:center;gap:1.5rem;margin-bottom:1.2rem">
             <div>
               <div style="font-family:'Orbitron',sans-serif;font-size:2rem;color:#ffd600">${posTurma}</div>
@@ -1715,19 +1716,95 @@
             </ul>
             <p style="text-align:center; color:var(--sw); font-weight:600; letter-spacing:1px;">O quiz entrará em TELA CHEIA para melhor experiência.</p>
           </div>`,
-        confirmButtonText: 'ESTOU PRONTO! 🚀',
+        confirmButtonText: 'PROSSEGUIR PARA IDENTIFICAÇÃO ›',
         confirmButtonColor: '#5c6bc0',
         allowOutsideClick: false,
         background: '#0d1117',
         showClass: { popup: 'swal2-show' }
       });
 
-      // Ativa tela cheia e COMEÇA O JOGO
-      launchGame();
+      promptLogin();
+    }
+
+    /* ── Prompt Login & Validation ── */
+    async function promptLogin() {
+      const { value: formValues } = await Swal.fire({
+        title: '📝 Identifique-se',
+        html: `
+          <div style="text-align:left; font-size:0.9rem; color:var(--muted); margin-bottom:10px;">Insira seus dados conforme cadastrado pelo professor:</div>
+          <input id="swal-nome" class="swal2-input" placeholder="Seu nome completo" style="margin-bottom:15px; width:80%;">
+          <input id="swal-turma" class="swal2-input" placeholder="Sua turma (Ex: INFO-1A)" style="width:80%;">
+        `,
+        focusConfirm: false,
+        allowOutsideClick: false,
+        confirmButtonText: 'VALIDAR E ENTRAR 🚀',
+        confirmButtonColor: '#5c6bc0',
+        preConfirm: () => {
+          const n = document.getElementById('swal-nome').value.trim();
+          const t = document.getElementById('swal-turma').value.trim();
+          if (!n || !t) {
+            Swal.showValidationMessage('Preencha nome e turma!');
+            return false;
+          }
+          return { nome: n, turma: t };
+        }
+      });
+
+      if (!formValues) return;
+
+      Swal.fire({
+        title: '🔍 Validando...',
+        didOpen: () => Swal.showLoading(),
+        allowOutsideClick: false
+      });
+
+      try {
+        const payload = { ...formValues, tema: TEMA };
+        const res = await axios.post('validar_aluno.php', payload);
+        
+        if (res.data.sucesso) {
+          alunoId = res.data.aluno_id;
+          nomeAluno = formValues.nome;
+          turmaAluno = formValues.turma;
+          
+          Swal.fire({
+            icon: 'success',
+            title: `Bem-vindo, ${nomeAluno.split(' ')[0]}!`,
+            text: 'Tudo pronto. O desafio vai começar!',
+            timer: 1500,
+            showConfirmButton: false
+          }).then(launchGame);
+        } else {
+          // Se já fez o quiz, bloqueia e manda pro ranking
+          if (res.data.ja_fez) {
+            Swal.fire({
+              icon: 'info',
+              title: 'Acesso Restrito',
+              text: res.data.erro,
+              confirmButtonText: '🏆 VER RANKING',
+              confirmButtonColor: '#5c6bc0'
+            }).then(() => {
+              // Simula o comportamento do Anti-Cheat local para este aluno
+              localStorage.setItem(LS_KEY, 'TRUE');
+              checkAlreadyPlayed();
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Ops! Acesso negado',
+              text: res.data.erro,
+              confirmButtonText: 'TENTAR NOVAMENTE'
+            }).then(promptLogin);
+          }
+        }
+      } catch (err) {
+        Swal.fire('Erro!', 'Não foi possível conectar ao servidor.', 'error').then(promptLogin);
+      }
     }
 
     /* ── Play button click ── */
     function launchGame() {
+      // ... (rest of launchGame code remains same, I'll update answer and endGame next)
       // Solicita modo tela cheia (permitido após o clique do SweetAlert)
       const docEl = document.documentElement;
       if (!document.fullscreenElement) {
