@@ -32,14 +32,18 @@ CREATE TABLE IF NOT EXISTS pontuacoes (
     CONSTRAINT fk_pontuacao_aluno FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS respostas_detalhadas (
-    id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    pontuacao_id   INT UNSIGNED NOT NULL,
-    questao_nome   VARCHAR(100) NOT NULL,
-    resposta_aluno VARCHAR(50)  NOT NULL,
-    correta        BOOLEAN      NOT NULL,
-    criado_em      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_resposta_pontuacao FOREIGN KEY (pontuacao_id) REFERENCES pontuacoes(id) ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS aluno_perfil (
+    aluno_id      INT UNSIGNED PRIMARY KEY,
+    idade         TINYINT UNSIGNED,
+    curso_faculdade VARCHAR(100),
+    frequencia    VARCHAR(50),
+    uso_principal VARCHAR(50),
+    nivel_declarado VARCHAR(50),
+    habilidades   TEXT, -- O que ele marcou que sabe fazer
+    dificuldades  TEXT,
+    objetivo      TEXT,
+    criado_em     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_perfil_aluno FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Migração: Adicionar coluna tema se não existir

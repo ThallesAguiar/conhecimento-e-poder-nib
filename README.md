@@ -1,49 +1,49 @@
 # ⚡ Conhecimento é poder — Nivelamento Informática Básica
 
-Um sistema de quiz gamificado e responsivo, desenvolvido para ambientes escolares, focado no nivelamento de conceitos de Informática Básica (como Hardware vs. Software, Dispositivos de Entrada vs. Saída, etc.). O projeto utiliza uma estética *Cyberpunk/Futurista* para engajar os alunos e oferece um sistema de ranking dinâmico e ferramentas de diagnóstico pedagógico.
+Um sistema de quiz gamificado e responsivo, desenvolvido para ambientes escolares, focado no nivelamento de conceitos de Informática Básica (como Hardware vs. Software, Dispositivos de Entrada vs. Saída, etc.). O projeto utiliza uma estética *Cyberpunk/Futurista* para engajar os alunos e oferece um ecossistema completo de **Diagnóstico Pedagógico**.
 
 ## 🚀 Diferenciais Pedagógicos
 
 - **Pausa Pedagógica:** O cronômetro para automaticamente quando o aluno responde uma questão. Isso permite que ele leia a explicação detalhada sem a pressão do tempo, focando no **aprendizado real** antes de prosseguir.
-- **Validação de Acesso:** O sistema permite que o professor pré-cadastre os alunos. Isso evita que pessoas externas respondam ao quiz e garante que os dados coletados sejam apenas dos alunos da turma.
-- **Rastreamento de Aprendizado (Diagnóstico):** O sistema agora grava **cada resposta individual** do aluno (quais questões ele acertou ou errou). Isso permite que o professor realize um diagnóstico inicial e compare com o desempenho ao final do curso para medir a evolução.
-- **Ranking por Turma:** Permite filtrar os resultados por turma, facilitando a visualização do desempenho de grupos específicos pelo professor.
+- **Dossiê de Evolução:** O professor tem acesso a um relatório que cruza o que o aluno *acha* que sabe (via Forms inicial) com o que ele *realmente* demonstra no quiz.
+- **Fluxo Simplificado:** Com o Importador Mestre, o professor cadastra a turma e o diagnóstico inicial em um único clique, fazendo o upload do CSV exportado do Google Forms.
+- **Validação de Acesso:** O sistema exige identificação pré-cadastrada, garantindo a integridade dos dados e evitando usuários externos.
 
 ## 🛠️ Funcionalidades Técnicas
 
-- **Importador de Alunos:** Script utilitário (`importar_alunos.php`) para o professor cadastrar rapidamente listas de alunos via cópia/cola (formato Nome;Turma).
-- **Endpoint de Validação:** API em PHP para validar se o nome e turma inseridos pelo aluno existem no banco de dados antes de iniciar o desafio.
-- **Persistência de Respostas:** Nova estrutura de banco de dados que vincula pontuações a IDs de alunos e armazena o histórico detalhado de cada tentativa.
-- **Multi-Temas:** Suporta múltiplos quizes através de parâmetros na URL, organizando os rankings de forma independente.
-- **Ranking Vivo:** Atualização automática a cada 30 segundos com filtros dinâmicos.
-- **Sistema Anti-Cheat:** Utiliza trava por `localStorage` vinculada ao tema e à turma para evitar re-tentativas não autorizadas.
+- **Importador Mestre (`importar_diagnostico.php`):** Ferramenta unificada para cadastrar alunos e perfis iniciais através do **upload direto** do CSV do Google Forms (ou colagem manual).
+- **Relatório de Evolução (`relatorio.php`):** Dashboard para o professor acompanhar médias de acertos, temas concluídos e comparar com o diagnóstico inicial.
+- **Endpoint de Validação Anti-Duplicidade:** Verifica no banco de dados se o aluno já realizou o desafio, impedindo re-tentativas mesmo em dispositivos diferentes.
+- **Registro Detalhado:** Grava cada resposta individual (correta ou errada) para análise posterior de pontos críticos da turma.
+- **Multi-Temas:** Suporta múltiplos quizes via URL (ex: `tema=hardware`), com rankings independentes.
 
 ## 💻 Tecnologias Utilizadas
 
-- **Frontend:** HTML5, CSS3 (Vanilla), JavaScript (ES6+), Bootstrap 5.
-- **Bibliotecas JS:** Axios (API), SweetAlert2 (Modais), Google Fonts.
+- **Frontend:** HTML5, CSS3, JavaScript (ES6+), Bootstrap 5.
+- **Bibliotecas JS:** Axios (API), SweetAlert2 (Modais).
 - **Backend:** PHP 8.x (PDO).
-- **Banco de Dados:** MySQL / MariaDB (com chaves estrangeiras e índices).
+- **Banco de Dados:** MySQL / MariaDB (Relacional).
 
 ## 📦 Como Instalar
 
-1. Clone o repositório em sua pasta `htdocs` (se usar XAMPP):
+1. Clone o repositório em sua pasta `htdocs`:
    ```bash
-   git clone https://github.com/ThallesAguiar/conhecimento-e-poder-nib.git
+   git clone https://github.com/ThallesAguiar/quiz-nib.git
    ```
-2. Importe o arquivo `setup.sql` no seu PHPMyAdmin para criar o banco de dados e as tabelas (`alunos`, `pontuacoes`, `respostas_detalhadas`).
+2. Importe o arquivo `setup.sql` no seu PHPMyAdmin.
 3. Configure o arquivo `db.php` com as credenciais do seu banco de dados.
-4. **Passo do Professor:** Acesse `importar_alunos.php` e cole a lista de nomes e turmas dos seus alunos para liberar o acesso ao quiz.
-5. **Acesso do Aluno:** Distribua o link do `index.html` (ex: `http://localhost/quiz/index.html?tema=geral&turma=INFO-1A`).
 
-## 🔄 Fluxo do Jogo Atualizado
+## 👨‍🏫 Guia do Professor (Ciclo de Uso)
 
-1.  **Entrada:** O sistema lê o tema e a turma da URL.
-2.  **Instruções e Identificação:** O aluno lê as regras e, em seguida, deve inserir seu **Nome Completo** e **Turma**.
-3.  **Validação:** O sistema consulta o banco de dados. Se o aluno estiver cadastrado, o quiz é liberado.
-4.  **Desafio com Pausa:** O cronômetro conta apenas o tempo de raciocínio. Ao responder, ele para para que o aluno leia o feedback explicativo.
-5.  **Registro Automático:** Ao final das 15 questões, os resultados (incluindo o que foi respondido em cada pergunta) são enviados automaticamente ao servidor vinculados ao ID do aluno.
-6.  **Ranking:** O aluno é levado ao ranking para ver sua posição em relação aos colegas.
+1. **Importar Dados Mestre:** No Google Forms, exporte as respostas como **CSV**. No `importar_diagnostico.php`, defina o código da turma (ex: `T01`) e faça o upload deste arquivo. Isso cadastrará todos os alunos e seus perfis de uma só vez.
+2. **Realizar o Quiz:** Distribua o link para os alunos (Ex: `index.html?tema=geral`).
+3. **Analisar Evolução:** Acesse `relatorio.php` para ver o "Dossiê" de cada aluno e como o conhecimento real deles se compara ao nível que declararam no início.
+
+## 🔄 Fluxo do Aluno
+
+1. **Identificação:** O aluno insere Nome e Turma (Curso). O sistema valida o acesso e bloqueia se ele já tiver jogado aquele tema.
+2. **Desafio:** Responde as questões com feedback imediato e explicações pedagógicas.
+3. **Ranking:** Visualiza sua posição em tempo real no ranking da turma.
 
 ---
 **Desenvolvido para fins educacionais · Diagnóstico e Nivelamento de Informática**

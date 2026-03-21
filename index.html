@@ -1245,9 +1245,9 @@
     const LS_KEY = `quiz_v1_${TEMA}_${TURMA || 'sem_turma'}`;
 
     /* ══════════════════════════════════════════════
-       ANTI-CHEAT CHECK
+       UI & INITIALIZATION
     ══════════════════════════════════════════════ */
-    function checkAlreadyPlayed() {
+    function updateHeaderInfo() {
       // Show info in subtitle
       const subEl = document.getElementById('site-sub');
       const temaFormatado = TEMA.replace(/_/g, ' ').toUpperCase();
@@ -1259,17 +1259,15 @@
         label += ` &nbsp;<span class="no-turma-warn">⚠️ Sem turma definida</span>`;
       }
       subEl.innerHTML = label;
+    }
 
-      if (localStorage.getItem(LS_KEY)) {
-        document.getElementById('played-banner').style.display = 'block';
-        document.getElementById('game-section').style.display = 'none';
-        const tab = new bootstrap.Tab(document.getElementById('daily-tab'));
-        tab.show();
-        rankingTurmaFilter = TURMA;
-        loadRanking('diario');
-        return true;
-      }
-      return false;
+    function showAlreadyPlayedUI() {
+      document.getElementById('played-banner').style.display = 'block';
+      document.getElementById('game-section').style.display = 'none';
+      const tab = new bootstrap.Tab(document.getElementById('daily-tab'));
+      tab.show();
+      rankingTurmaFilter = TURMA;
+      loadRanking('diario');
     }
 
     /* ══════════════════════════════════════════════
@@ -1504,12 +1502,6 @@
         const res = await axios.post('salvaPontuacao.php', payload);
         const data = res.data;
 
-        // Anti-cheat: lock out after successful submit
-        localStorage.setItem(LS_KEY, JSON.stringify({
-          nome: nomeAluno, acertos: hits, erros: misses,
-          tempo: elapsedSeconds, ts: Date.now()
-        }));
-
         const posGeral = data.posicao ? `${data.posicao}º` : '–';
         const posTurma = data.posicao_turma ? `${data.posicao_turma}º` : '–';
         const turmaLabel = turmaAluno ? `Turma ${escHtml(turmaAluno)}` : 'Geral';
@@ -1543,11 +1535,7 @@
         });
 
         // Redirect to ranking tab
-        document.getElementById('played-banner').style.display = 'block';
-        document.getElementById('game-section').style.display = 'none';
-        const tab = new bootstrap.Tab(document.getElementById('daily-tab'));
-        tab.show();
-        loadRanking('diario');
+        showAlreadyPlayedUI();
 
       } catch (err) {
         console.error(err);
@@ -1694,10 +1682,9 @@
        INIT
     ══════════════════════════════════════════════ */
     window.addEventListener('DOMContentLoaded', () => {
-      if (!checkAlreadyPlayed()) {
-        prepGame(); // shuffle + load first question
-        showInstructions(); // Mostra as instruções ao abrir
-      }
+      updateHeaderInfo();
+      prepGame(); // shuffle + load first question
+      showInstructions(); // Mostra as instruções ao abrir
     });
 
     /* ── Show Instructions on Load ── */
@@ -1784,9 +1771,7 @@
               confirmButtonText: '🏆 VER RANKING',
               confirmButtonColor: '#5c6bc0'
             }).then(() => {
-              // Simula o comportamento do Anti-Cheat local para este aluno
-              localStorage.setItem(LS_KEY, 'TRUE');
-              checkAlreadyPlayed();
+              showAlreadyPlayedUI();
             });
           } else {
             Swal.fire({

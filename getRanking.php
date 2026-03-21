@@ -18,8 +18,8 @@ $tipo = isset($_GET['tipo']) ? $_GET['tipo'] : 'geral';
 $turma = isset($_GET['turma']) ? trim($_GET['turma']) : '';
 $tema = isset($_GET['tema']) ? trim($_GET['tema']) : 'geral';
 
-// Sanitiza turma e tema
-$turma = preg_replace('/[^a-zA-Z0-9\-_]/', '', $turma);
+// Sanitiza turma e tema (permite letras, números, espaços, hifens e sublinhados)
+$turma = preg_replace('/[^a-zA-Z0-9\-_ ]/', '', $turma);
 $tema = preg_replace('/[^a-zA-Z0-9\-_]/', '', $tema);
 
 try {
