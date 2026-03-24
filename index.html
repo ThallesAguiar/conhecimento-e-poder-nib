@@ -1141,87 +1141,127 @@
     /* ══════════════════════════════════════════════
        DATA
     ══════════════════════════════════════════════ */
-    // Configuração dinâmica das categorias (gerada pela IA)
-    const CONFIG = {
-      cat1: { id: 'hardware', label: 'Hardware', icon: '💻' },
-      cat2: { id: 'software', label: 'Software', icon: '💿' }
-    };
-
+    // Configuração de categorias (Agora as opções vêm de cada item)
     const ITEMS = [
       {
-        name: "Memória RAM", icon: "🧠", type: "hardware",
-        ok: "A RAM é um chip físico instalado na placa-mãe. Armazena dados temporários em uso pelo processador — você pode tocá-la!",
-        err: "A RAM é um componente eletrônico físico. Por ser tangível e instalável, é HARDWARE."
+        question: "Qual atalho (comando) usamos para COPIAR um texto ou arquivo no Windows?",
+        icon: "📋",
+        options: [
+          { label: "CTRL + C", isCorrect: true, feedback: "Exato! O comando CTRL + C copia o conteúdo selecionado para a área de transferência." },
+          { label: "CTRL + Z", isCorrect: false, feedback: "Ops! CTRL + Z serve para DESFAZER a última ação. Para copiar, o comando é CTRL + C." }
+        ]
       },
       {
-        name: "Sistema Operacional", icon: "🖥️", type: "software",
-        ok: "O S.O. (Windows, Linux, macOS) é um conjunto de programas que gerencia recursos do computador. Não tem forma física — é código puro!",
-        err: "O S.O. é um programa. Não existe fisicamente, portanto é SOFTWARE."
+        question: "Quero abrir o Histórico da Área de Transferência (ver tudo que copiei). Qual comando uso?",
+        icon: "📋",
+        options: [
+          { label: "WINDOWS + V", isCorrect: true, feedback: "Correto! O comando Win+V abre o histórico de tudo que você copiou recentemente no Windows." },
+          { label: "WINDOWS + C", isCorrect: false, feedback: "Não... Antigamente o Win+C abria a Cortana. O comando correto para a área de transferência é Win+V." }
+        ]
       },
       {
-        name: "Processador (CPU)", icon: "⚙️", type: "hardware",
-        ok: "A CPU é o 'cérebro' físico do computador: um chip de silício que você pode segurar na mão. Definitivamente hardware!",
-        err: "A CPU é um microchip físico. Por ser um componente eletrônico tangível, é HARDWARE."
+        question: "A Memória RAM é qual categoria de componente do computador?",
+        icon: "🧠",
+        options: [
+          { label: "Hardware", isCorrect: true, feedback: "Correto! A RAM é um componente físico (um chip de silício) instalado na placa-mãe." },
+          { label: "Software", isCorrect: false, feedback: "Não! Software são programas e códigos. A RAM é um componente físico tangível, logo é Hardware." }
+        ]
       },
       {
-        name: "Antivírus", icon: "🛡️", type: "software",
-        ok: "O antivírus é um programa instalado para detectar ameaças digitais. Por ser um conjunto de código, é software!",
-        err: "O antivírus é um aplicativo. Não tem existência física, portanto é SOFTWARE."
+        question: "O Sistema Operacional (ex: Windows, Linux) é considerado:",
+        icon: "🖥️",
+        options: [
+          { label: "Software", isCorrect: true, feedback: "Isso mesmo! O S.O. é um conjunto de programas que gerencia os recursos do computador." },
+          { label: "Hardware", isCorrect: false, feedback: "Cuidado! O S.O. é um conjunto de instruções lógicas (código), por isso é Software." }
+        ]
       },
       {
-        name: "Teclado", icon: "⌨️", type: "hardware",
-        ok: "O teclado é um periférico de entrada físico. Você o usa todos os dias — é um objeto real, portanto hardware!",
-        err: "O teclado é um dispositivo físico de entrada. Por ser tangível e eletrônico, é HARDWARE."
+        question: "Qual atalho usamos para COLAR um conteúdo que foi previamente copiado?",
+        icon: "📥",
+        options: [
+          { label: "CTRL + V", isCorrect: true, feedback: "Perfeito! CTRL + V insere o conteúdo da área de transferência no local selecionado." },
+          { label: "CTRL + P", isCorrect: false, feedback: "Não... CTRL + P é o atalho para IMPRIMIR (Print). Para colar, usamos CTRL + V." }
+        ]
       },
       {
-        name: "Navegador Web", icon: "🌐", type: "software",
-        ok: "Chrome, Firefox, Edge são programas para acessar a internet. São softwares instalados no seu computador!",
-        err: "O navegador é um aplicativo. Por não ter existência física, é SOFTWARE."
+        question: "Um Pendrive ou HD Externo são dispositivos de:",
+        icon: "💾",
+        options: [
+          { label: "Armazenamento", isCorrect: true, feedback: "Correto! Eles servem para guardar arquivos de forma permanente (memória secundária)." },
+          { label: "Processamento", isCorrect: false, feedback: "Não. O processamento é feito pela CPU. Pendrives e HDs servem para guardar (armazenar) dados." }
+        ]
       },
       {
-        name: "HD / SSD", icon: "💾", type: "hardware",
-        ok: "HD e SSD são dispositivos físicos de armazenamento permanente. Você pode segurá-los e instalá-los!",
-        err: "HD e SSD são dispositivos físicos de armazenamento. São HARDWARE."
+        question: "O Google Chrome e o Microsoft Edge são exemplos de:",
+        icon: "🌐",
+        options: [
+          { label: "Navegadores (Software)", isCorrect: true, feedback: "Exato! São aplicativos usados para acessar e visualizar páginas na internet." },
+          { label: "Provedores de Internet", isCorrect: false, feedback: "Não. Provedores são as empresas que fornecem o sinal. Chrome e Edge são os programas (Navegadores)." }
+        ]
       },
       {
-        name: "Planilha Excel", icon: "📊", type: "software",
-        ok: "O Excel é um aplicativo de planilhas que roda no sistema operacional — portanto, software!",
-        err: "O Excel é um programa. Por ser código executável, é SOFTWARE."
+        question: "Qual componente é conhecido como o 'Cérebro' do computador?",
+        icon: "⚙️",
+        options: [
+          { label: "CPU (Processador)", isCorrect: true, feedback: "Correto! A CPU (Unidade Central de Processamento) executa todos os cálculos e instruções." },
+          { label: "Placa de Vídeo", isCorrect: false, feedback: "Não. A Placa de Vídeo foca em imagens. O 'cérebro' geral é o Processador (CPU)." }
+        ]
       },
       {
-        name: "Placa de Vídeo (GPU)", icon: "🎮", type: "hardware",
-        ok: "A GPU é um componente eletrônico responsável pelo processamento gráfico. É um chip físico instalado no PC!",
-        err: "A GPU é um componente eletrônico físico. Por ser tangível e instalável, é HARDWARE."
+        question: "O Monitor e a Impressora são dispositivos de:",
+        icon: "🖨️",
+        options: [
+          { label: "Saída", isCorrect: true, feedback: "Sim! Eles retiram a informação de dentro do computador e mostram ou entregam ao usuário." },
+          { label: "Entrada", isCorrect: false, feedback: "Não. Dispositivos de entrada (como teclado) enviam dados PARA o computador." }
+        ]
       },
       {
-        name: "Editor de Texto", icon: "📝", type: "software",
-        ok: "Word, LibreOffice e similares são programas para criação de documentos. Existem apenas como código!",
-        err: "Editores de texto são aplicativos. Não têm forma física, portanto são SOFTWARE."
+        question: "Qual atalho fecha a janela ou o programa que está ativo no momento?",
+        icon: "❌",
+        options: [
+          { label: "ALT + F4", isCorrect: true, feedback: "Isso! ALT + F4 é o comando clássico para fechar janelas no Windows." },
+          { label: "ALT + TAB", isCorrect: false, feedback: "Quase! ALT + TAB serve para ALTERNAR entre janelas abertas, não para fechá-las." }
+        ]
       },
       {
-        name: "Monitor", icon: "🖥️", type: "hardware",
-        ok: "O monitor é um periférico de saída físico. É um dispositivo eletrônico que você vê e toca!",
-        err: "O monitor é um dispositivo físico de exibição. Por ser eletrônico e tangível, é HARDWARE."
+        question: "O Teclado e o Mouse são dispositivos de:",
+        icon: "⌨️",
+        options: [
+          { label: "Entrada", isCorrect: true, feedback: "Correto! Eles servem para enviar comandos e dados do usuário PARA dentro do computador." },
+          { label: "Saída", isCorrect: false, feedback: "Não. Saída é quando o PC nos envia algo (como som ou imagem). Teclado envia dados PARA o PC." }
+        ]
       },
       {
-        name: "Jogo Digital", icon: "🕹️", type: "software",
-        ok: "Um jogo é um programa composto por código, gráficos e sons. Mesmo em mídia física, o jogo em si é software!",
-        err: "Jogos digitais são programas de computador. O conteúdo digital (código) é SOFTWARE."
+        question: "O que significa a sigla CPU?",
+        icon: "📟",
+        options: [
+          { label: "Central Processing Unit", isCorrect: true, feedback: "Exato! Em português: Unidade Central de Processamento." },
+          { label: "Computer Personal Unit", isCorrect: false, feedback: "Incorreto. A sigla correta para o processador é Central Processing Unit." }
+        ]
       },
       {
-        name: "Impressora", icon: "🖨️", type: "hardware",
-        ok: "A impressora é um periférico físico que produz documentos em papel. É um equipamento eletromecânico!",
-        err: "A impressora é um dispositivo físico externo. Por ser um equipamento tangível, é HARDWARE."
+        question: "Qual destes é um Software de edição de textos (escrita)?",
+        icon: "📝",
+        options: [
+          { label: "Microsoft Word", isCorrect: true, feedback: "Correto! O Word é o editor de textos mais popular do mundo." },
+          { label: "Microsoft Excel", isCorrect: false, feedback: "Não. O Excel é focado em planilhas e cálculos. Para textos, o Word é o ideal." }
+        ]
       },
       {
-        name: "Aplicativo de Banco", icon: "🏦", type: "software",
-        ok: "Apps bancários são programas executados em smartphones. São conjuntos de código que realizam operações digitais!",
-        err: "Aplicativos são programas. Por existirem apenas como código digital, são SOFTWARE."
+        question: "Para selecionar TODO o texto de um documento de uma vez, qual atalho uso?",
+        icon: "📑",
+        options: [
+          { label: "CTRL + A", isCorrect: true, feedback: "Isso! No Windows, CTRL + A (All) seleciona tudo que está na tela ou documento." },
+          { label: "CTRL + T", isCorrect: false, feedback: "Atenção! No Windows em português, CTRL+A seleciona tudo. CTRL+T abre nova aba em navegadores." }
+        ]
       },
       {
-        name: "Placa-Mãe", icon: "🔌", type: "hardware",
-        ok: "A placa-mãe é o circuito impresso físico que conecta todos os componentes do PC — a espinha dorsal física da máquina!",
-        err: "A placa-mãe é um circuito físico. Por ser o componente central e tangível do computador, é HARDWARE."
+        question: "A Placa-Mãe (Motherboard) tem a função de:",
+        icon: "🔌",
+        options: [
+          { label: "Conectar todos os componentes", isCorrect: true, feedback: "Exato! Ela é a base física onde todos os outros componentes são instalados e interligados." },
+          { label: "Apenas fornecer energia", isCorrect: false, feedback: "Não. Quem fornece energia é a Fonte. A Placa-mãe interconecta todos os dados entre os componentes." }
+        ]
       },
     ];
 
@@ -1335,9 +1375,6 @@
     function renderQuestion(keepOverlay) {
       if (current >= shuffled.length) { endGame(); return; }
       answered = false;
-      // Only enable buttons if overlay is gone
-      if (!keepOverlay) setButtons(false);
-      else setButtons(true); // keep disabled while on splash
 
       const q = shuffled[current];
       const card = document.getElementById('item-card');
@@ -1346,19 +1383,36 @@
       card.classList.add('slide-up');
 
       document.getElementById('item-icon').textContent = q.icon;
-      document.getElementById('item-name').textContent = q.name;
+      document.getElementById('item-name').textContent = q.question;
       document.getElementById('q-label').textContent = `Questão ${current + 1} de ${shuffled.length}`;
+      
+      // Gera os botões dinamicamente
+      const btnArea = document.querySelector('.btn-area');
+      btnArea.innerHTML = q.options.map((opt, idx) => {
+        const colorClass = idx % 2 === 0 ? 'btn-hw' : 'btn-sw';
+        return `
+          <button class="btn-choice ${colorClass}" onclick="answer(${idx})">
+            ${opt.label.toUpperCase()}
+          </button>
+        `;
+      }).join('');
+
+      // Desabilitar se estiver no splash
+      if (!keepOverlay) setButtons(false);
+      else setButtons(true);
+
       updateProgress();
     }
 
-    function answer(choice) {
+    function answer(optionIdx) {
       if (answered || gameOver) return;
       answered = true;
       setButtons(true);
       stopTimer(); // Pausa o tempo para leitura do feedback
 
       const q = shuffled[current];
-      const ok = choice === q.type;
+      const selected = q.options[optionIdx];
+      const ok = selected.isCorrect;
       const card = document.getElementById('item-card');
 
       if (ok) hits++;
@@ -1367,30 +1421,32 @@
 
       // REGISTRO PEDAGÓGICO: Salva o detalhamento da resposta
       respostasDadas.push({
-        questao: q.name,
-        resposta: choice,
+        questao: q.question,
+        resposta: selected.label,
         correta: ok
       });
 
       card.classList.add(ok ? 'flash-ok' : 'flash-err');
 
-      // Detecta qual é a categoria correta para exibir no feedback
-      const correctInfo = q.type === CONFIG.cat1.id ? CONFIG.cat1 : CONFIG.cat2;
-      const catLabel = `<span style="color:var(--hw);font-family:'Orbitron',sans-serif">${correctInfo.label.toUpperCase()}</span>`;
+      // Busca a opção correta para exibição em caso de erro
+      const correta = q.options.find(o => o.isCorrect);
 
       if (ok) {
         Swal.fire({
           icon: 'success', iconColor: '#00e676',
           title: '✅ Correto!',
-          html: `<strong style="font-family:'Orbitron',sans-serif;font-size:1.1rem">${q.name}</strong> é ${catLabel}<br><br><span style="color:rgba(220,232,248,.75)">${q.ok}</span>`,
+          html: `
+            <div style="font-family:'Rajdhani',sans-serif; text-align:center;">
+              <div style="font-size:1.1rem; color:var(--ok); font-family:'Orbitron',sans-serif; margin-bottom:10px;">${selected.label.toUpperCase()}</div>
+              <div style="color:rgba(220,232,248,.75); font-size:1rem; line-height:1.4;">${selected.feedback}</div>
+            </div>`,
           confirmButtonText: current + 1 < shuffled.length ? 'ENTENDI, PRÓXIMA ›' : 'VER MEU DESEMPENHO ›',
           confirmButtonColor: '#5c6bc0',
-          showClass: { popup: 'swal2-show' },
           allowOutsideClick: false,
         }).then(() => {
           current++;
           if (current < shuffled.length) {
-            startTimer(false); // Retoma o tempo sem zerar
+            startTimer(false); 
             renderQuestion();
           } else {
             endGame();
@@ -1399,15 +1455,20 @@
       } else {
         Swal.fire({
           icon: 'error', iconColor: '#ff1744',
-          title: '❌ Não foi dessa vez!',
-          html: `<strong style="font-family:'Orbitron',sans-serif;font-size:1.1rem">${q.name}</strong> é ${catLabel}<br><br><span style="color:rgba(220,232,248,.75)">${q.err}</span>`,
+          title: '❌ Ops! Errado',
+          html: `
+            <div style="font-family:'Rajdhani',sans-serif; text-align:center;">
+              <div style="font-size:0.9rem; color:var(--muted); margin-bottom:5px;">Você escolheu: ${selected.label}</div>
+              <div style="font-size:1.1rem; color:var(--ok); font-family:'Orbitron',sans-serif; margin-bottom:10px;">Correto: ${correta.label.toUpperCase()}</div>
+              <div style="color:rgba(220,232,248,.75); font-size:1rem; line-height:1.4;">${selected.feedback}</div>
+            </div>`,
           confirmButtonText: current + 1 < shuffled.length ? 'ENTENDI, CONTINUAR ›' : 'VER MEU DESEMPENHO ›',
           confirmButtonColor: '#5c6bc0',
           allowOutsideClick: false,
         }).then(() => {
           current++;
           if (current < shuffled.length) {
-            startTimer(false); // Retoma o tempo sem zerar
+            startTimer(false);
             renderQuestion();
           } else {
             endGame();
@@ -1430,9 +1491,10 @@
     }
 
     function setButtons(disabled) {
-      document.getElementById('btn-hw').disabled = disabled;
-      document.getElementById('btn-sw').disabled = disabled;
+      const buttons = document.querySelectorAll('.btn-choice');
+      buttons.forEach(btn => btn.disabled = disabled);
     }
+
 
     /* ══════════════════════════════════════════════
        END GAME
@@ -1796,7 +1858,6 @@
 
     /* ── Play button click ── */
     function launchGame() {
-      // ... (rest of launchGame code remains same, I'll update answer and endGame next)
       // Solicita modo tela cheia (permitido após o clique do SweetAlert)
       const docEl = document.documentElement;
       if (!document.fullscreenElement) {
@@ -1809,20 +1870,9 @@
 
       const overlay = document.getElementById('splash-overlay');
       const controls = document.getElementById('game-controls');
-      const btnArea = controls.querySelector('.btn-area');
 
       // Se o overlay já sumiu, não faz nada
       if (overlay.style.display === 'none' || overlay.classList.contains('hiding')) return;
-
-      // Gera os botões dinamicamente conforme a CONFIG
-      btnArea.innerHTML = `
-        <button class="btn-choice btn-hw" id="btn-cat1" onclick="answer('${CONFIG.cat1.id}')">
-          <span class="btn-emoji">${CONFIG.cat1.icon}</span>${CONFIG.cat1.label.toUpperCase()}
-        </button>
-        <button class="btn-choice btn-sw" id="btn-cat2" onclick="answer('${CONFIG.cat2.id}')">
-          <span class="btn-emoji">${CONFIG.cat2.icon}</span>${CONFIG.cat2.label.toUpperCase()}
-        </button>
-      `;
 
       // Animate overlay out
       overlay.classList.add('hiding');
@@ -1837,10 +1887,8 @@
     }
 
     function setButtons(disabled) {
-      const b1 = document.getElementById('btn-cat1');
-      const b2 = document.getElementById('btn-cat2');
-      if (b1) b1.disabled = disabled;
-      if (b2) b2.disabled = disabled;
+      const buttons = document.querySelectorAll('.btn-choice');
+      buttons.forEach(btn => btn.disabled = disabled);
     }
   </script>
 </body>
