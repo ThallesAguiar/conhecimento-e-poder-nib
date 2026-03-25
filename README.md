@@ -50,13 +50,15 @@ Um sistema de quiz gamificado e responsivo, desenvolvido para ambientes escolare
 
 Inspirado no game *Knowledge is Power* do PS4, agora o sistema suporta partidas competitivas em tempo real com mecânicas avançadas de engajamento.
 
-### 🎭 Dinâmica da Partida
+### 🎭 Dinâmica da Partida (CEP Style)
 1.  **Fase de Poderes**: Antes de cada pergunta, os alunos têm 8 segundos para escolher um poder (**Gelo ❄️** ou **Gosma 🟢**) e selecionar um colega da sala como alvo.
-2.  **Revelação de Ataques**: Se um aluno for atacado, ele recebe um aviso na tela ("Fulano jogou Gelo em você!") e sofre o efeito visual (tela congelada ou coberta de gosma).
-3.  **Get Ready**: Uma placa de contagem regressiva de 5 segundos prepara todos para a pergunta simultânea.
-4.  **Bônus de Velocidade**: Quanto mais rápido o aluno responder corretamente, mais pontos ele ganha (de 10 a 100 pontos por rodada).
-5.  **Mini-Ranking**: Após cada resposta, o aluno visualiza sua posição atual na sala.
-6.  **Pódio Final**: Ao encerrar o show, um ranking completo é exibido para coroar o campeão.
+2.  **Revelação de Ataques**: O sistema identifica quem lançou o poder. O alvo recebe o alerta: *"JOÃO LANÇOU GELO EM VOCÊ!"* e sofre o efeito visual imediato.
+3.  **Efeitos Especiais**: 
+    *   **Gelo ❄️**: Congela os botões por 4 segundos.
+    *   **Gosma 🟢**: Cobre as respostas com uma mancha verde (o aluno deve clicar para limpar).
+4.  **Get Ready**: Uma placa de contagem regressiva prepara todos para a pergunta simultânea.
+5.  **Bônus de Velocidade**: Quanto mais rápido o aluno responder corretamente, mais pontos ele ganha (de 10 a 100 pontos por rodada).
+6.  **Pódio Final**: Ao encerrar o show, um ranking completo com cores de **Ouro, Prata e Bronze** é exibido para todos.
 
 ### 👨‍🏫 Para o Professor (Host)
 1. Acesse o painel de controle em: `host.html`.
