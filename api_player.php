@@ -22,6 +22,7 @@ try {
     elseif ($action === 'status') {
         $jogador_id = $_GET['jogador_id'];
         $sessao_id = $_GET['sessao_id'];
+        $last_index = isset($_GET['last_index']) ? (int)$_GET['last_index'] : -1;
 
         $stmt = $pdo->prepare("SELECT status, indice_pergunta_atual FROM sessoes_quiz WHERE id = ?");
         $stmt->execute([$sessao_id]);
@@ -31,10 +32,11 @@ try {
         $stmt->execute([$jogador_id]);
         $jogador = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Retorna ataque e limpa
+        // Retorna ataque e limpa APENAS se estiver mudando de pergunta (last_index < atual)
         $ataque = $jogador['ataque_recebido'];
         $quem = $jogador['atacante_nome'];
-        if ($ataque) {
+        
+        if ($ataque && (int)$sessao['indice_pergunta_atual'] > $last_index) {
             $pdo->prepare("UPDATE jogadores_sessao SET ataque_recebido = NULL, atacante_nome = NULL WHERE id = ?")->execute([$jogador_id]);
         }
 

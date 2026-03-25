@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conhecimento é Poder — Show de TV</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    :root { --hw: #00d4ff; --sw: #ff8c00; --bg: #07090f; --surface: #0d1117; --panel: #131923; --border: rgba(255, 255, 255, 0.07); --text: #dce8f8; --muted: rgba(220, 232, 248, 0.38); --accent: #5c6bc0; --ok: #00e676; --err: #ff1744; --gold: #ffd600; }
+    body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px); background-size: 48px 48px; animation: gridDrift 20s linear infinite; pointer-events: none; z-index: 0; }
+    @keyframes gridDrift { from { background-position: 0 0; } to { background-position: 48px 48px; } }
+    .wrap { position: relative; z-index: 2; max-width: 640px; margin: 0 auto; padding: 1rem; }
+    .site-header { text-align: center; padding: 1rem; }
+    .site-title { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 900; background: linear-gradient(100deg, var(--hw), var(--sw)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hud { display: flex; justify-content: space-around; margin-bottom: 1rem; }
+    .hud-chip { background: var(--panel); border: 1px solid var(--border); border-radius: 50px; padding: 0.4rem 1rem; font-size: 0.8rem; font-weight: 600; }
+    .timer-bar-container { width: 100%; height: 12px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-bottom: 1rem; overflow: hidden; border: 1px solid var(--border); }
+    .timer-bar-fill { height: 100%; background: linear-gradient(90deg, var(--sw), var(--gold)); width: 100%; transition: width 0.1s linear; }
+    .item-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem 2rem; text-align: center; position: relative; margin-bottom: 1rem; min-height: 280px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+    .item-icon { font-size: 4.5rem; display: block; margin-bottom: 1rem; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .item-name { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; font-weight: 800; color: #fff; line-height: 1.2; }
+    .btn-area { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .btn-choice { border: none; border-radius: 16px; padding: 1.2rem; font-family: 'Orbitron', sans-serif; font-size: 0.9rem; font-weight: 800; cursor: pointer; transition: all 0.2s; min-height: 90px; box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
+    .btn-choice:active { transform: translateY(4px); box-shadow: none; }
+    .btn-hw { background: linear-gradient(135deg, #003d4d, #005566); color: var(--hw); border: 1px solid var(--hw); }
+    .btn-sw { background: linear-gradient(135deg, #3d2000, #5a2e00); color: var(--sw); border: 1px solid var(--sw); }
+    .btn-choice:disabled { opacity: 0.3; cursor: not-allowed; }
+    .power-overlay { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 20px; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+    .frozen { background: rgba(0, 212, 255, 0.75); backdrop-filter: blur(12px); border: 4px solid var(--hw); pointer-events: all; }
+    .glopped { background: rgba(0, 230, 118, 0.98); pointer-events: all; cursor: pointer; }
+    .power-active { opacity: 1; }
+    #splash-overlay, #get-ready-screen { position: absolute; inset: 0; border-radius: 20px; background: rgba(7, 9, 15, 0.98); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
+    .hidden { display: none !important; }
+    .ready-title { font-size: 0.8rem; color: var(--muted); letter-spacing: 6px; text-transform: uppercase; margin-bottom: 10px; }
+    .ready-num { font-family: 'Orbitron'; font-size: 5rem; color: var(--gold); text-shadow: 0 0 20px var(--gold); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-header">
+      <div class="site-title">⚡ CONHECIMENTO É PODER</div>
+      <div id="site-sub" style="font-size:0.7rem; color:var(--muted); letter-spacing:2px">SHOW DE TALENTOS</div>
+    </header>
+
+    <div class="hud">
+      <div class="hud-chip">🏆 <span id="hud-pts">0 pts</span></div>
+      <div class="hud-chip">🎮 <span id="q-label">Aguardando...</span></div>
+    </div>
+
+    <div class="timer-bar-container"><div id="timer-bar-fill" class="timer-bar-fill"></div></div>
+
+    <div class="item-card" id="item-card">
+      <div id="power-overlay" class="power-overlay" onclick="cleanGloop()">
+        <div id="power-msg" style="font-family:'Orbitron'; font-size:1.8rem; color:#fff; text-shadow:0 0 20px #000; margin-bottom:10px;"></div>
+        <div id="power-sub" style="font-size:1.1rem; color:#fff; font-weight:800; background:rgba(0,0,0,0.5); padding:5px 15px; border-radius:50px"></div>
+      </div>
+
+      <div id="splash-overlay">
+        <div style="font-size:4rem; animation: pulse 2s infinite">🎮</div>
+        <span style="font-family:'Orbitron'; letter-spacing:2px; color:var(--hw)">AGUARDANDO O HOST...</span>
+      </div>
+
+      <div id="question-content" class="hidden">
+        <span class="item-icon" id="item-icon">⚡</span>
+        <div class="item-name" id="item-name">...</div>
+      </div>
+
+      <div id="get-ready-screen" class="hidden">
+        <div class="ready-title" id="ready-label">RODADA 1</div>
+        <div class="ready-num" id="get-ready-timer">5</div>
+      </div>
+    </div>
+
+    <div id="game-controls" class="hidden">
+      <div class="btn-area" id="btn-area"></div>
+    </div>
+  </div>
+
+  <script>
+    const ITEMS = [
+      { question: "Qual atalho (comando) usamos para COPIAR um texto ou arquivo no Windows?", icon: "📋", options: [{ label: "CTRL + C", isCorrect: true, feedback: "Correto! C de Copy." }, { label: "CTRL + V", isCorrect: false, feedback: "Não! CTRL+V serve para COLAR." }, { label: "CTRL + X", isCorrect: false, feedback: "Errado! CTRL+X Recorta." }, { label: "CTRL + Z", isCorrect: false, feedback: "Não! CTRL+Z Desfaz." }] },
+      { question: "Qual componente é conhecido como o 'Cérebro' do computador?", icon: "⚙️", options: [{ label: "CPU", isCorrect: true, feedback: "Exato! A CPU processa tudo." }, { label: "RAM", isCorrect: false, feedback: "Não! RAM é memória temporária." }, { label: "HD", isCorrect: false, feedback: "Errado! HD guarda arquivos." }, { label: "Placa-Mãe", isCorrect: false, feedback: "Não! Ela apenas conecta as peças." }] },
+      { question: "O Windows, Linux e o macOS são exemplos de:", icon: "🖥️", options: [{ label: "Sistemas Operacionais", isCorrect: true, feedback: "Isso! Eles gerenciam o PC." }, { label: "Navegadores", isCorrect: false, feedback: "Não! Navegadores são Chrome/Edge." }, { label: "Hardwares", isCorrect: false, feedback: "Errado! São programas (Softwares)." }, { label: "Jogos", isCorrect: false, feedback: "Não! São softwares de base." }] },
+      { question: "Qual dispositivo é de SAÍDA de dados?", icon: "🔊", options: [{ label: "Monitor", isCorrect: true, feedback: "Correto! Ele exibe a imagem." }, { label: "Teclado", isCorrect: false, feedback: "Não! Teclado é de Entrada." }, { label: "Mouse", isCorrect: false, feedback: "Não! Mouse é de Entrada." }, { label: "Microfone", isCorrect: false, feedback: "Errado! Microfone é Entrada." }] },
+      { question: "Para que serve o atalho ALT + TAB?", icon: "🔄", options: [{ label: "Alternar janelas", isCorrect: true, feedback: "Isso! Navega entre programas abertos." }, { label: "Fechar janelas", isCorrect: false, feedback: "Não! Para fechar é ALT+F4." }, { label: "Salvar", isCorrect: false, feedback: "Não! Salvar é CTRL+S." }, { label: "Reiniciar", isCorrect: false, feedback: "Errado! Não há atalho para isso." }] },
+      { question: "Qual destes é um Software de edição de textos?", icon: "📝", options: [{ label: "Word", isCorrect: true, feedback: "Correto!" }, { label: "Excel", isCorrect: false, feedback: "Excel é para planilhas." }, { label: "Chrome", isCorrect: false, feedback: "Chrome é navegador." }, { label: "Spotify", isCorrect: false, feedback: "Spotify é música." }] },
+      { question: "A Memória RAM armazena dados:", icon: "🧠", options: [{ label: "Temporariamente", isCorrect: true, feedback: "Exato! Apaga ao desligar." }, { label: "Para sempre", isCorrect: false, feedback: "Não! Isso é o HD/SSD." }, { label: "Na nuvem", isCorrect: false, feedback: "Não! RAM é física no PC." }, { label: "De vídeo apenas", isCorrect: false, feedback: "Não! RAM é geral." }] },
+      { question: "Atalho para salvar um arquivo (padrão Windows):", icon: "💾", options: [{ label: "CTRL + S", isCorrect: true, feedback: "Correto! S de Save." }, { label: "CTRL + P", isCorrect: false, feedback: "P é para Imprimir." }, { label: "CTRL + O", isCorrect: false, feedback: "O é para Abrir." }, { label: "CTRL + N", isCorrect: false, feedback: "N é para Novo." }] },
+      { question: "Onde ficam guardados os arquivos permanentemente?", icon: "💾", options: [{ label: "HD ou SSD", isCorrect: true, feedback: "Correto!" }, { label: "RAM", isCorrect: false, feedback: "Não! RAM é volátil." }, { label: "Processador", isCorrect: false, feedback: "Processador não guarda arquivos." }, { label: "Teclado", isCorrect: false, feedback: "Teclado é para digitar." }] },
+      { question: "Dispositivo usado para capturar imagens físicas para o PC:", icon: "📷", options: [{ label: "Scanner", isCorrect: true, feedback: "Isso!" }, { label: "Impressora", isCorrect: false, feedback: "Impressora faz o oposto." }, { label: "Monitor", isCorrect: false, feedback: "Monitor exibe, não captura." }, { label: "Fone de Ouvido", isCorrect: false, feedback: "Não!" }] },
+      { question: "O que significa WWW?", icon: "🌐", options: [{ label: "World Wide Web", isCorrect: true, feedback: "Correto!" }, { label: "Wide World Web", isCorrect: false, feedback: "Não!" }, { label: "Web World Wide", isCorrect: false, feedback: "Não!" }, { label: "Web Wide World", isCorrect: false, feedback: "Não!" }] },
+      { question: "Atalho para selecionar TUDO:", icon: "📑", options: [{ label: "CTRL + A", isCorrect: true, feedback: "Correto! A de All." }, { label: "CTRL + T", isCorrect: false, feedback: "T é para novas abas." }, { label: "CTRL + C", isCorrect: false, feedback: "C é copiar." }, { label: "CTRL + V", isCorrect: false, feedback: "V é colar." }] },
+      { question: "O principal buscador da internet é o:", icon: "🔍", options: [{ label: "Google", isCorrect: true, feedback: "Exato!" }, { label: "Facebook", isCorrect: false, feedback: "É rede social." }, { label: "WhatsApp", isCorrect: false, feedback: "É mensageiro." }, { label: "Instagram", isCorrect: false, feedback: "É fotos/vídeos." }] },
+      { question: "Qual atalho fecha a janela atual?", icon: "❌", options: [{ label: "ALT + F4", isCorrect: true, feedback: "Correto!" }, { label: "ALT + TAB", isCorrect: false, feedback: "Alterna janelas." }, { label: "CTRL + C", isCorrect: false, feedback: "Copiar." }, { label: "Win + D", isCorrect: false, feedback: "Mostra área de trabalho." }] },
+      { question: "A peça onde tudo se conecta no PC é a:", icon: "🔌", options: [{ label: "Placa-Mãe", isCorrect: true, feedback: "Exato!" }, { label: "Fonte", isCorrect: false, feedback: "Dá energia." }, { label: "Processador", isCorrect: false, feedback: "É o cérebro." }, { label: "Gabinete", isCorrect: false, feedback: "É apenas a caixa." }] }
+    ];
+
+    let current = 0, totalPoints = 0, answered = false, gameOver = false, timerInterval = null, timeLeft = 100;
+    let isMultiplayer = false, sessaoId = null, jogadorIdMulti = null, lastSyncIndex = -1, nomeUser = '';
+
+    function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+
+    window.onload = async () => {
+      const { value: mode } = await Swal.fire({ title: '⚡ BEM-VINDO', text: 'ESCOLHA SEU MODO:', showDenyButton: true, confirmButtonText: 'SOLO', denyButtonText: 'DUELO', confirmButtonColor: '#5c6bc0', denyButtonColor: '#ff8c00', allowOutsideClick: false });
+      isMultiplayer = mode === false;
+      const { value: form } = await Swal.fire({ title: 'IDENTIFIQUE-SE', html: `<input id="n" class="swal2-input" placeholder="Seu Nome"><input id="c" class="swal2-input" placeholder="${isMultiplayer ? 'Código da Sala' : 'Sua Turma'}">`, preConfirm: () => ({ nome: document.getElementById('n').value, extra: document.getElementById('c').value }), allowOutsideClick: false });
+      nomeUser = form.nome;
+      if (isMultiplayer) {
+        const res = await axios.post('api_player.php?action=entrar', { nome: form.nome, codigo: form.extra });
+        if (res.data.sucesso) { sessaoId = res.data.sessao_id; jogadorIdMulti = res.data.jogador_id; startSyncPolling(); }
+        else { Swal.fire('Erro', res.data.erro, 'error').then(() => location.reload()); }
+      } else { 
+        ITEMS.forEach(it => it._curOps = shuffle(it.options));
+        document.getElementById('splash-overlay').classList.add('hidden'); 
+        renderQuestion(); 
+      }
+    };
+
+    function startSyncPolling() {
+      const poller = setInterval(async () => {
+        if (gameOver) { clearInterval(poller); return; }
+        try {
+          const res = await axios.get(`api_player.php?action=status&sessao_id=${sessaoId}&jogador_id=${jogadorIdMulti}&last_index=${lastSyncIndex}`);
+          if (res.data.encerrada) { gameOver = true; clearInterval(poller); Swal.close(); showFinalRanking(); return; }
+          
+          const remoteIdx = parseInt(res.data.sessao.indice_pergunta_atual);
+          if (remoteIdx > lastSyncIndex) {
+            lastSyncIndex = remoteIdx; current = remoteIdx;
+            if (Swal.isVisible()) Swal.close();
+            document.getElementById('splash-overlay').classList.add('hidden');
+            await flowPerguntaCEP(res.data.ataque, res.data.quem_atacou);
+          }
+        } catch (e) { console.error("Erro na conexão"); }
+      }, 1500);
+    }
+
+    async function flowPerguntaCEP(ataqueRecebido, quemAtacou) {
+      document.getElementById('question-content').classList.add('hidden');
+      document.getElementById('game-controls').classList.add('hidden');
+      document.getElementById('power-overlay').classList.remove('power-active');
+
+      // 1. Fase de Poderes
+      await Swal.fire({
+        title: 'ESCOLHA SEU PODER',
+        html: '<div class="d-grid gap-2"><button class="btn btn-info py-3" onclick="lancarPoder(\'ice\')">❄️ GELO</button><button class="btn btn-success py-3" onclick="lancarPoder(\'gloop\')">🟢 GOSMA</button><button class="btn btn-secondary py-3" onclick="Swal.clickConfirm()">NENHUM</button></div>',
+        showConfirmButton: false, timer: 8000, timerProgressBar: true, allowOutsideClick: false
+      });
+
+      // 2. Revelação de Ataques
+      if (ataqueRecebido) {
+        const icon = ataqueRecebido === 'ice' ? '❄️' : '🟢';
+        const nomeVilao = quemAtacou ? quemAtacou.toUpperCase() : 'ALGUÉM';
+        await Swal.fire({
+          title: `${icon} CUIDADO! ${icon}`,
+          html: `<h2 style="color:var(--err); font-family:Orbitron">${ataqueRecebido === 'ice' ? 'CONGELADO!' : 'GOSMA!'}</h2><p style="letter-spacing:1px"><b>${nomeVilao}</b> ATACOU VOCÊ!</p>`,
+          timer: 3500, showConfirmButton: false, allowOutsideClick: false,
+          didOpen: () => applyPowerEffect(ataqueRecebido, nomeVilao)
+        });
+      }
+
+      // 3. Get Ready
+      document.getElementById('ready-label').textContent = `RODADA ${current + 1}`;
+      document.getElementById('get-ready-screen').classList.remove('hidden');
+      let count = 5;
+      const readyTimer = document.getElementById('get-ready-timer');
+      readyTimer.textContent = count;
+
+      return new Promise(resolve => {
+        const interval = setInterval(() => {
+          count--; readyTimer.textContent = count;
+          if (count <= 0) {
+            clearInterval(interval);
+            document.getElementById('get-ready-screen').classList.add('hidden');
+            renderQuestion();
+            resolve();
+          }
+        }, 1000);
+      });
+    }
+
+    async function lancarPoder(tipo) {
+      const res = await axios.get(`api_player.php?action=listar_oponentes&sessao_id=${sessaoId}&jogador_id=${jogadorIdMulti}`);
+      const oponentes = res.data.jogadores;
+      if (oponentes.length === 0) { Swal.clickConfirm(); return; }
+      const { value: alvo } = await Swal.fire({ title: 'ESCOLHA O ALVO', input: 'select', inputOptions: Object.fromEntries(oponentes.map(o => [o.id, o.nome.toUpperCase()])), showCancelButton: false, confirmButtonColor: '#5c6bc0' });
+      if (alvo) await axios.post('api_player.php?action=atacar', { alvo_id: alvo, tipo: tipo, meu_nome: nomeUser });
+      Swal.clickConfirm();
+    }
+
+    function renderQuestion() {
+      if (current >= ITEMS.length) { if(!isMultiplayer) showFinalRanking(); return; }
+      answered = false; const q = ITEMS[current];
+      document.getElementById('question-content').classList.remove('hidden');
+      document.getElementById('game-controls').classList.remove('hidden');
+      document.getElementById('item-icon').textContent = q.icon;
+      document.getElementById('item-name').textContent = q.question;
+      document.getElementById('q-label').textContent = `Questão ${current + 1}/15`;
+      q._curOps = shuffle(q.options);
+      document.getElementById('btn-area').innerHTML = q._curOps.map((o, i) => `<button class="btn-choice ${i % 2 === 0 ? 'btn-hw' : 'btn-sw'}" onclick="answer(${i})">${o.label}</button>`).join('');
+      setButtons(false); startTimer();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval); timeLeft = 100;
+      timerInterval = setInterval(() => {
+        timeLeft -= 0.7; document.getElementById('timer-bar-fill').style.width = timeLeft + '%';
+        if (timeLeft <= 0) { clearInterval(timerInterval); answer(-1); }
+      }, 100);
+    }
+
+    async function answer(idx) {
+      if (answered) return; answered = true; clearInterval(timerInterval); setButtons(true);
+      const q = ITEMS[current];
+      const sel = idx === -1 ? { isCorrect: false, feedback: "Tempo esgotado!" } : q._curOps[idx];
+      let pts = sel.isCorrect ? Math.max(10, Math.round(timeLeft)) : 0;
+      if (sel.isCorrect) totalPoints += pts;
+      document.getElementById('hud-pts').textContent = totalPoints + " pts";
+      if (isMultiplayer) await axios.post('api_player.php?action=responder', { jogador_id: jogadorIdMulti, pontos: pts });
+      
+      Swal.fire({ icon: sel.isCorrect ? 'success' : 'error', title: sel.isCorrect ? `+${pts} PONTOS` : 'ERROU!', text: sel.feedback, showConfirmButton: false, timer: 3000 }).then(() => {
+        if (!isMultiplayer) { current++; renderQuestion(); }
+        else showMiniRanking();
+      });
+    }
+
+    async function showMiniRanking() {
+      const res = await axios.get(`api_host.php?action=status&sessao_id=${sessaoId}`);
+      const list = res.data.jogadores;
+      const me = list.find(j => j.nome === nomeUser);
+      const pos = list.indexOf(me) + 1;
+      Swal.fire({ title: 'POSIÇÃO ATUAL', html: `<h1 style="font-size:5rem; color:var(--gold)">${pos}º</h1><p style="letter-spacing:2px; font-weight:bold">${totalPoints} PONTOS</p>`, timer: 4000, showConfirmButton: false });
+    }
+
+    async function showFinalRanking() {
+      clearInterval(timerInterval);
+      const res = await axios.get(`api_host.php?action=status&sessao_id=${sessaoId}`);
+      const ranks = res.data.jogadores || [];
+      const html = ranks.map((r, i) => {
+        const color = i === 0 ? 'var(--gold)' : (i === 1 ? '#c0c0c0' : (i === 2 ? '#cd7f32' : '#fff'));
+        return `<div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #333; color:${color}; font-weight:bold;"><span>${i+1}º ${r.nome.toUpperCase()}</span> <span>${r.pontuacao} PTS</span></div>`;
+      }).join('');
+      await Swal.fire({ title: '🏆 PÓDIO FINAL 🏆', html: html || `Você fez ${totalPoints} pontos!`, confirmButtonText: 'VOLTAR AO INÍCIO', confirmButtonColor: '#5c6bc0', allowOutsideClick: false });
+      location.reload();
+    }
+
+    function applyPowerEffect(t, quem) {
+      const o = document.getElementById('power-overlay');
+      o.className = 'power-overlay power-active ' + (t === 'ice' ? 'frozen' : 'glopped');
+      document.getElementById('power-msg').textContent = t === 'ice' ? 'CONGELADO!' : 'GOSMA!';
+      document.getElementById('power-sub').textContent = `${quem.toUpperCase()} ATACOU VOCÊ!`;
+      if (t === 'ice') setTimeout(() => o.classList.remove('power-active'), 4000);
+    }
+    function cleanGloop() { document.getElementById('power-overlay').classList.remove('power-active'); }
+    function setButtons(d) { document.querySelectorAll('.btn-choice').forEach(b => b.disabled = d); }
+  </script>
+</body>
+</html>
