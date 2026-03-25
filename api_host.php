@@ -17,49 +17,57 @@ try {
         $stmt->execute([$codigo, $tema]);
 
         echo json_encode(['sucesso' => true, 'sessao_id' => $pdo->lastInsertId(), 'codigo' => $codigo]);
-    } 
-    elseif ($action === 'iniciar') {
+    } elseif ($action === 'iniciar') {
         $sessao_id = $_GET['sessao_id'];
         $stmt = $pdo->prepare("UPDATE sessoes_quiz SET status = 'ativa', indice_pergunta_atual = 0 WHERE id = ?");
         $stmt->execute([$sessao_id]);
         echo json_encode(['sucesso' => true]);
-    }
-    elseif ($action === 'proxima') {
+    } elseif ($action === 'proxima') {
         $sessao_id = $_GET['sessao_id'];
         $stmt = $pdo->prepare("UPDATE sessoes_quiz SET indice_pergunta_atual = indice_pergunta_atual + 1 WHERE id = ?");
         $stmt->execute([$sessao_id]);
         echo json_encode(['sucesso' => true]);
-    }
-    elseif ($action === 'encerrar') {
+    } elseif ($action === 'encerrar') {
         $sessao_id = $_GET['sessao_id'];
         $stmt = $pdo->prepare("UPDATE sessoes_quiz SET status = 'encerrada' WHERE id = ?");
         $stmt->execute([$sessao_id]);
         echo json_encode(['sucesso' => true]);
-    }
-    elseif ($action === 'atacar') {
+    } elseif ($action === 'atacar') {
         $jogador_id = $_GET['jogador_id'];
         $tipo = $_GET['tipo']; // 'ice' ou 'gloop'
-        
+
         $stmt = $pdo->prepare("UPDATE jogadores_sessao SET ataque_recebido = ? WHERE id = ?");
         $stmt->execute([$tipo, $jogador_id]);
         echo json_encode(['sucesso' => true]);
-    }
-    elseif ($action === 'status') {
+    } elseif ($action === 'status') {
         $sessao_id = $_GET['sessao_id'];
-        
+
         // Dados da Sessão
         $stmt = $pdo->prepare("SELECT * FROM sessoes_quiz WHERE id = ?");
         $stmt->execute([$sessao_id]);
         $sessao = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Lista de Jogadores e Ranking em tempo real
-        $stmt = $pdo->prepare("SELECT id, nome, avatar, pontuacao FROM jogadores_sessao WHERE sessao_id = ? ORDER BY pontuacao DESC");
-        $stmt->execute([$sessao_id]);
+        $include_absent = isset($_GET['include_absent']) && $_GET['include_absent'] == '1';
+        if ($include_absent) {
+            $stmt = $pdo->prepare("SELECT id, nome, avatar, pontuacao FROM jogadores_sessao WHERE sessao_id = ? ORDER BY pontuacao DESC");
+            $stmt->execute([$sessao_id]);
+        } else {
+            // tentar filtrar por ausente; se a coluna não existir, fazer fallback para consulta sem filtro
+            try {
+                $stmt = $pdo->prepare("SELECT id, nome, avatar, pontuacao FROM jogadores_sessao WHERE sessao_id = ? AND (ausente IS NULL OR ausente = 0) ORDER BY pontuacao DESC");
+                $stmt->execute([$sessao_id]);
+            } catch (PDOException $e) {
+                // coluna 'ausente' pode não existir em bancos antigos — fallback
+                $stmt = $pdo->prepare("SELECT id, nome, avatar, pontuacao FROM jogadores_sessao WHERE sessao_id = ? ORDER BY pontuacao DESC");
+                $stmt->execute([$sessao_id]);
+            }
+        }
         $jogadores = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         echo json_encode([
-            'sucesso' => true, 
-            'sessao' => $sessao, 
+            'sucesso' => true,
+            'sessao' => $sessao,
             'jogadores' => $jogadores
         ]);
     }

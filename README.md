@@ -46,6 +46,17 @@ Um sistema de quiz gamificado e responsivo, desenvolvido para ambientes escolare
 2. **Desafio:** Responde as questões com feedback imediato e explicações pedagógicas personalizadas.
 3. **Ranking:** Visualiza sua posição em tempo real no ranking da turma.
 
+## 🆕 Novas funcionalidades (multiplayer)
+
+- **Modo Duelo aprimorado:** O host pode criar salas com código de 6 dígitos e compartilhar o link direto (botão "Copiar link da sala").
+- **Prefill por link:** O jogador pode abrir o link `index.php?codigo=XXXXXX` e o campo de código virá pré-preenchido na identificação.
+- **Desistência preservada:** Alunos agora podem "Desistir" durante a partida — nesse caso ficam marcados como `ausente` (sua pontuação é preservada para o pódio final, mas são removidos da lista ativa).
+- **Bloqueio de entrada:** Novos participantes não conseguem entrar quando a sala já está em andamento (status `ativa`).
+- **Encerrar sala manualmente:** O professor pode encerrar a sala a qualquer momento; ao encerrar, o pódio final (incluindo ausentes) é exibido e há botão para "Jogar Novamente" (recarrega o painel).
+- **Notificações no host:** Se um aluno sair/for marcado como ausente, o host recebe uma notificação rápida (toast) e o contador de alunos é atualizado.
+
+Estas funcionalidades foram adicionadas ao painel do host (`host.html`), ao cliente jogador (`index.php`) e às APIs (`api_host.php`, `api_player.php`).
+
 ## 🔥 Modo Duelo (CEP Style — Sincronizado)
 
 Inspirado no game *Knowledge is Power* do PS4, agora o sistema suporta partidas competitivas em tempo real com mecânicas avançadas de engajamento.

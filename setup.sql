@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS `jogadores_sessao` (
   `nome` VARCHAR(100) NOT NULL,
   `avatar` VARCHAR(50) DEFAULT '👤',
   `pontuacao` INT DEFAULT 0,
+  `ausente` TINYINT(1) DEFAULT 0,
   `ataque_recebido` VARCHAR(20) DEFAULT NULL,
   `atacante_nome` VARCHAR(100) DEFAULT NULL,
   `ultimo_ping` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -90,5 +91,10 @@ PREPARE stmt1 FROM @sql_ataque; EXECUTE stmt1; DEALLOCATE PREPARE stmt1;
 SET @exists_quem = (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'jogadores_sessao' AND column_name = 'atacante_nome');
 SET @sql_quem = IF(@exists_quem = 0, 'ALTER TABLE jogadores_sessao ADD COLUMN atacante_nome VARCHAR(100) DEFAULT NULL AFTER ataque_recebido', 'SELECT 1');
 PREPARE stmt2 FROM @sql_quem; EXECUTE stmt2; DEALLOCATE PREPARE stmt2;
+
+-- Migração: Coluna 'ausente' na tabela jogadores_sessao
+SET @exists_ausente = (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'jogadores_sessao' AND column_name = 'ausente');
+SET @sql_ausente = IF(@exists_ausente = 0, 'ALTER TABLE jogadores_sessao ADD COLUMN ausente TINYINT(1) DEFAULT 0 AFTER pontuacao', 'SELECT 1');
+PREPARE stmt3 FROM @sql_ausente; EXECUTE stmt3; DEALLOCATE PREPARE stmt3;
 
 SELECT 'Banco de dados atualizado com sucesso!' AS status;
