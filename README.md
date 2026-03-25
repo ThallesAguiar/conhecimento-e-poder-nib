@@ -46,6 +46,31 @@ Um sistema de quiz gamificado e responsivo, desenvolvido para ambientes escolare
 2. **Desafio:** Responde as questões com feedback imediato e explicações pedagógicas personalizadas.
 3. **Ranking:** Visualiza sua posição em tempo real no ranking da turma.
 
+## 🔥 Modo Duelo (CEP Style — Sincronizado)
+
+Inspirado no game *Knowledge is Power* do PS4, agora o sistema suporta partidas competitivas em tempo real com mecânicas avançadas de engajamento.
+
+### 🎭 Dinâmica da Partida
+1.  **Fase de Poderes**: Antes de cada pergunta, os alunos têm 8 segundos para escolher um poder (**Gelo ❄️** ou **Gosma 🟢**) e selecionar um colega da sala como alvo.
+2.  **Revelação de Ataques**: Se um aluno for atacado, ele recebe um aviso na tela ("Fulano jogou Gelo em você!") e sofre o efeito visual (tela congelada ou coberta de gosma).
+3.  **Get Ready**: Uma placa de contagem regressiva de 5 segundos prepara todos para a pergunta simultânea.
+4.  **Bônus de Velocidade**: Quanto mais rápido o aluno responder corretamente, mais pontos ele ganha (de 10 a 100 pontos por rodada).
+5.  **Mini-Ranking**: Após cada resposta, o aluno visualiza sua posição atual na sala.
+6.  **Pódio Final**: Ao encerrar o show, um ranking completo é exibido para coroar o campeão.
+
+### 👨‍🏫 Para o Professor (Host)
+1. Acesse o painel de controle em: `host.html`.
+2. Clique em **Criar Sala** e compartilhe o código de 6 dígitos.
+3. Quando todos entrarem, clique em **Iniciar Desafio**.
+4. Use o botão **Avançar Rodada** para disparar a fase de poderes e a pergunta para todos simultaneamente.
+5. Acompanhe o **Ranking ao Vivo** no seu painel.
+
+### 🎓 Para o Aluno (Jogador)
+1. Acesse `index.html`.
+2. Nas instruções iniciais, escolha **MODO DUELO**.
+3. Insira seu nome e o **Código da Sala** fornecido pelo professor.
+4. Aguarde o professor iniciar a partida. As perguntas aparecerão automaticamente no seu dispositivo conforme o professor avançar.
+
 ## 🤖 Prompt para IA (Geração de Conteúdo sob Demanda)
 
 O motor do quiz é flexível. Você pode usar o prompt abaixo em qualquer IA (ChatGPT, Gemini, Claude) para gerar novas questões de **qualquer disciplina**. Basta preencher os campos entre colchetes:
@@ -57,11 +82,14 @@ Cada objeto deve seguir esta estrutura exata:
   "question": "Texto da pergunta aqui?",
   "icon": "Emoji relacionado ao tema da questão",
   "options": [
-    { "label": "Opção A", "isCorrect": true/false, "feedback": "Explicação pedagógica detalhada para esta escolha" },
-    { "label": "Opção B", "isCorrect": true/false, "feedback": "Explicação pedagógica detalhada para esta escolha" }
+    { "label": "Opção A", "isCorrect": true, "feedback": "Explicação pedagógica detalhada para esta escolha" },
+    { "label": "Opção B", "isCorrect": false, "feedback": "Explicação pedagógica detalhada para esta escolha" },
+    { "label": "Opção C", "isCorrect": false, "feedback": "Explicação pedagógica detalhada para esta escolha" },
+    { "label": "Opção D", "isCorrect": false, "feedback": "Explicação pedagógica detalhada para esta escolha" }
   ]
 }
 As questões devem focar em: [DESCREVA OS SUB-TEMAS OU NÍVEL DE DIFICULDADE].
+Sempre forneça 4 opções de resposta, sendo apenas 1 correta.
 Mantenha um tom encorajador e educativo nos feedbacks, garantindo que o aluno aprenda mesmo se errar a opção.
 ```
 

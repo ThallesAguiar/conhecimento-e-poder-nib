@@ -52,4 +52,36 @@ SET @exists = (SELECT COUNT(*) FROM information_schema.columns
 SET @sql = IF(@exists = 0, 'ALTER TABLE pontuacoes ADD COLUMN tema VARCHAR(50) NOT NULL DEFAULT "geral" AFTER turma', 'SELECT "Coluna tema ja existe"');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
+-- Atualização: Suporte a Multiplayer (Lobbies e Jogadores)
+CREATE TABLE IF NOT EXISTS `sessoes_quiz` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `codigo` CHAR(6) NOT NULL UNIQUE,  -- Código de 6 caracteres para entrar
+  `tema` VARCHAR(50) DEFAULT 'geral',
+  `status` ENUM('aguardando', 'ativa', 'encerrada') DEFAULT 'aguardando',
+  `indice_pergunta_atual` INT DEFAULT -1, -- -1 = Lobby
+  `data_criacao` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `jogadores_sessao` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `sessao_id` INT NOT NULL,
+  `nome` VARCHAR(100) NOT NULL,
+  `avatar` VARCHAR(50) DEFAULT '👤',
+  `pontuacao` INT DEFAULT 0,
+  `ataque_recebido` VARCHAR(20) DEFAULT NULL, -- Guarda se recebeu 'ice' ou 'gloop'
+  `atacante_nome` VARCHAR(100) DEFAULT NULL,  -- Nome de quem enviou o ataque
+  `ultimo_ping` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`sessao_id`) REFERENCES `sessoes_quiz`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Migração: Adicionar colunas se não existirem
+SET @exists_ataque = (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = 'quiz-nib' AND table_name = 'jogadores_sessao' AND column_name = 'ataque_recebido');
+SET @sql_ataque = IF(@exists_ataque = 0, 'ALTER TABLE jogadores_sessao ADD COLUMN ataque_recebido VARCHAR(20) DEFAULT NULL AFTER pontuacao', 'SELECT "Coluna ataque_recebido ja existe"');
+PREPARE stmt1 FROM @sql_ataque; EXECUTE stmt1; DEALLOCATE PREPARE stmt1;
+
+SET @exists_quem = (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = 'quiz-nib' AND table_name = 'jogadores_sessao' AND column_name = 'atacante_nome');
+SET @sql_quem = IF(@exists_quem = 0, 'ALTER TABLE jogadores_sessao ADD COLUMN atacante_nome VARCHAR(100) DEFAULT NULL AFTER ataque_recebido', 'SELECT "Coluna atacante_nome ja existe"');
+PREPARE stmt2 FROM @sql_quem; EXECUTE stmt2; DEALLOCATE PREPARE stmt2;
+
+
 SELECT 'Setup de temas concluído!' AS status;

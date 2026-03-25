@@ -1,1896 +1,259 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
-  <title>Conhecimento é poder — Nivelamento Informática Básica</title>
-
-  <!-- Bootstrap 5 -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
-  <!-- Google Fonts -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@400;500;600;700&display=swap"
-    rel="stylesheet"
-  />
-  <!-- SweetAlert2 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conhecimento é Poder — Show de TV</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!-- Axios -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
   <style>
-    /* ── Variables ── */
-    :root {
-      --hw: #00d4ff;
-      --sw: #ff8c00;
-      --bg: #07090f;
-      --surface: #0d1117;
-      --panel: #131923;
-      --border: rgba(255, 255, 255, 0.07);
-      --text: #dce8f8;
-      --muted: rgba(220, 232, 248, 0.38);
-      --accent: #5c6bc0;
-      --ok: #00e676;
-      --err: #ff1744;
-      --gold: #ffd600;
-      --silver: #b0bec5;
-      --bronze: #ff7043;
-    }
-
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: 'Rajdhani', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* Animated grid background */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
-      background-size: 48px 48px;
-      animation: gridDrift 20s linear infinite;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    @keyframes gridDrift {
-      from {
-        background-position: 0 0;
-      }
-
-      to {
-        background-position: 48px 48px;
-      }
-    }
-
-    /* Scanlines */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: repeating-linear-gradient(0deg, transparent, transparent 3px,
-          rgba(0, 0, 0, 0.07) 3px, rgba(0, 0, 0, 0.07) 4px);
-      pointer-events: none;
-      z-index: 1000;
-    }
-
-    .wrap {
-      position: relative;
-      z-index: 2;
-    }
-
-    /* ── Header ── */
-    .site-header {
-      text-align: center;
-      padding: 2rem 1rem 0.5rem;
-    }
-
-    .site-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: clamp(1.3rem, 4vw, 2.4rem);
-      font-weight: 900;
-      letter-spacing: 2px;
-      background: linear-gradient(100deg, var(--hw) 0%, #a78bfa 50%, var(--sw) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      filter: drop-shadow(0 0 24px rgba(92, 107, 192, 0.6));
-    }
-
-    .site-sub {
-      font-size: 0.72rem;
-      letter-spacing: 6px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-top: 0.3rem;
-      margin-bottom: 1.5rem;
-    }
-
-    /* ── Bootstrap Tabs override ── */
-    .nav-tabs {
-      border-bottom: 1px solid var(--border);
-      justify-content: center;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .nav-tabs .nav-link {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.72rem;
-      letter-spacing: 2px;
-      color: var(--muted);
-      border: 1px solid transparent;
-      border-radius: 8px 8px 0 0;
-      padding: 0.55rem 1.2rem;
-      transition: all 0.2s;
-    }
-
-    .nav-tabs .nav-link:hover {
-      color: var(--hw);
-    }
-
-    .nav-tabs .nav-link.active {
-      background: var(--panel);
-      border-color: var(--border) var(--border) var(--panel);
-      color: var(--hw);
-    }
-
-    /* ── Game Section ── */
-    #game-section {
-      max-width: 640px;
-      margin: 0 auto;
-      padding: 0 1rem;
-    }
-
-    /* Timer + Stats bar */
-    .hud {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.2rem;
-    }
-
-    .hud-chip {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 50px;
-      padding: 0.4rem 1.1rem;
-      font-size: 0.78rem;
-      font-weight: 600;
-      letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .hud-chip .val {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.95rem;
-    }
-
-    .val-blue {
-      color: var(--hw);
-    }
-
-    .val-orange {
-      color: var(--sw);
-    }
-
-    .val-green {
-      color: var(--ok);
-    }
-
-    .val-timer {
-      color: var(--gold);
-    }
-
-    /* Timer accent blink when > 60s */
-    .timer-urgent {
-      animation: timerBlink 1s ease infinite;
-    }
-
-    @keyframes timerBlink {
-
-      0%,
-      100% {
-        color: var(--gold);
-      }
-
-      50% {
-        color: var(--err);
-      }
-    }
-
-    /* Progress */
-    .progress-wrap {
-      margin-bottom: 1.5rem;
-    }
-
-    .progress-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.72rem;
-      color: var(--muted);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 0.4rem;
-    }
-
-    .progress {
-      height: 6px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 100px;
-    }
-
-    .progress-bar {
-      background: linear-gradient(90deg, #5c6bc0, var(--hw));
-      border-radius: 100px;
-      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-    }
-
-    .progress-bar::after {
-      content: '';
-      position: absolute;
-      right: -1px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--hw);
-      box-shadow: 0 0 8px var(--hw);
-    }
-
-    /* Question card */
-    .q-label {
-      text-align: center;
-      font-size: 0.7rem;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.6rem;
-    }
-
-    .item-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: clamp(2rem, 5vw, 3rem) 2rem;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 0 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-      margin-bottom: 1.2rem;
-    }
-
-    .item-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 20%;
-      right: 20%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      animation: glow 3s ease infinite;
-    }
-
-    @keyframes glow {
-
-      0%,
-      100% {
-        opacity: .4
-      }
-
-      50% {
-        opacity: 1
-      }
-    }
-
-    .item-icon {
-      font-size: clamp(3rem, 8vw, 4.5rem);
-      display: block;
-      animation: levitate 3.5s ease-in-out infinite;
-      margin-bottom: 1rem;
-    }
-
-    @keyframes levitate {
-
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-
-      50% {
-        transform: translateY(-10px);
-      }
-    }
-
-    .item-name {
-      font-family: 'Orbitron', sans-serif;
-      font-size: clamp(1.4rem, 5vw, 2.5rem);
-      font-weight: 800;
-      color: #fff;
-      letter-spacing: 1px;
-      filter: drop-shadow(0 0 18px rgba(92, 107, 192, 0.7));
-      line-height: 1.2;
-    }
-
-    /* Answer buttons */
-    .btn-area {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .btn-choice {
-      border: none;
-      border-radius: 16px;
-      padding: 1.3rem 1rem;
-      font-family: 'Orbitron', sans-serif;
-      font-size: clamp(0.75rem, 2.2vw, 1rem);
-      font-weight: 800;
-      letter-spacing: 1px;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s;
-    }
-
-    .btn-choice::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(255, 255, 255, 0.1);
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-
-    .btn-choice:hover:not(:disabled)::after {
-      opacity: 1;
-    }
-
-    .btn-choice:active:not(:disabled) {
-      transform: scale(0.95);
-    }
-
-    .btn-choice:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-
-    .btn-hw {
-      background: linear-gradient(135deg, #003d4d, #005566);
-      color: var(--hw);
-      border: 1px solid rgba(0, 212, 255, 0.25);
-      box-shadow: 0 0 28px rgba(0, 212, 255, 0.12);
-    }
-
-    .btn-hw:hover:not(:disabled) {
-      transform: translateY(-3px);
-      box-shadow: 0 0 48px rgba(0, 212, 255, 0.32);
-    }
-
-    .btn-sw {
-      background: linear-gradient(135deg, #3d2000, #5a2e00);
-      color: var(--sw);
-      border: 1px solid rgba(255, 140, 0, 0.25);
-      box-shadow: 0 0 28px rgba(255, 140, 0, 0.12);
-    }
-
-    .btn-sw:hover:not(:disabled) {
-      transform: translateY(-3px);
-      box-shadow: 0 0 48px rgba(255, 140, 0, 0.32);
-    }
-
-    .btn-emoji {
-      font-size: 1.6rem;
-      display: block;
-      margin-bottom: 0.3rem;
-    }
-
-    /* Flash feedback */
-    @keyframes flash-ok {
-      0% {
-        border-color: var(--ok);
-        box-shadow: 0 0 70px var(--ok)
-      }
-
-      100% {
-        border-color: var(--border);
-        box-shadow: 0 0 60px rgba(0, 0, 0, .6)
-      }
-    }
-
-    @keyframes flash-err {
-      0% {
-        border-color: var(--err);
-        box-shadow: 0 0 70px var(--err)
-      }
-
-      100% {
-        border-color: var(--border);
-        box-shadow: 0 0 60px rgba(0, 0, 0, .6)
-      }
-    }
-
-    .flash-ok {
-      animation: flash-ok 0.9s ease forwards;
-    }
-
-    .flash-err {
-      animation: flash-err 0.9s ease forwards;
-    }
-
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(24px) scale(.97);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    .slide-up {
-      animation: slideUp 0.38s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-
-    /* ── Ranking Section ── */
-    #ranking-section {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 0 1rem 3rem;
-    }
-
-    .rank-table-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    thead th {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.65rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--muted);
-      padding: 0.9rem 1rem;
-      background: var(--panel);
-      border-bottom: 1px solid var(--border);
-      text-align: center;
-    }
-
-    thead th:first-child {
-      text-align: left;
-      padding-left: 1.2rem;
-    }
-
-    thead th:nth-child(2) {
-      text-align: left;
-    }
-
-    tbody tr {
-      border-bottom: 1px solid var(--border);
-      transition: background 0.15s;
-    }
-
-    tbody tr:last-child {
-      border-bottom: none;
-    }
-
-    tbody tr:hover {
-      background: rgba(255, 255, 255, 0.03);
-    }
-
-    tbody td {
-      padding: 0.85rem 1rem;
-      font-size: 0.92rem;
-      font-weight: 500;
-      text-align: center;
-    }
-
-    tbody td:first-child {
-      text-align: left;
-      padding-left: 1.2rem;
-    }
-
-    tbody td:nth-child(2) {
-      text-align: left;
-      font-weight: 600;
-    }
-
-    .rank-pos {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.85rem;
-      font-weight: 800;
-      width: 2rem;
-      height: 2rem;
-      border-radius: 8px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .pos-1 {
-      background: rgba(255, 214, 0, 0.15);
-      color: var(--gold);
-      border: 1px solid rgba(255, 214, 0, .3);
-    }
-
-    .pos-2 {
-      background: rgba(176, 190, 197, 0.12);
-      color: var(--silver);
-      border: 1px solid rgba(176, 190, 197, .25);
-    }
-
-    .pos-3 {
-      background: rgba(255, 112, 67, 0.12);
-      color: var(--bronze);
-      border: 1px solid rgba(255, 112, 67, .25);
-    }
-
-    .pos-n {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--muted);
-      border: 1px solid var(--border);
-    }
-
-    .td-acertos {
-      color: var(--ok);
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.82rem;
-    }
-
-    .td-erros {
-      color: var(--err);
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.82rem;
-    }
-
-    .td-tempo {
-      color: var(--gold);
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.82rem;
-    }
-
-    .rank-empty {
-      text-align: center;
-      padding: 3rem 1rem;
-      color: var(--muted);
-      font-size: 0.85rem;
-      letter-spacing: 2px;
-    }
-
-    .rank-loading {
-      text-align: center;
-      padding: 2.5rem;
-      color: var(--muted);
-      font-size: 0.82rem;
-    }
-
-    /* Already-played banner */
-    #played-banner {
-      display: none;
-      max-width: 640px;
-      margin: 0 auto 2rem;
-      padding: 0 1rem;
-    }
-
-    .banner-card {
-      background: linear-gradient(135deg, #0d1c2e, #0a1520);
-      border: 1px solid rgba(0, 212, 255, 0.2);
-      border-radius: 16px;
-      padding: 2rem;
-      text-align: center;
-      box-shadow: 0 0 40px rgba(0, 212, 255, 0.08);
-    }
-
-    .banner-icon {
-      font-size: 3rem;
-      display: block;
-      margin-bottom: 0.8rem;
-    }
-
-    .banner-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1.1rem;
-      color: var(--hw);
-      margin-bottom: 0.5rem;
-    }
-
-    .banner-sub {
-      color: var(--muted);
-      font-size: 0.85rem;
-    }
-
-    /* SweetAlert2 custom theme */
-    .swal2-popup {
-      font-family: 'Rajdhani', sans-serif !important;
-      background: #0d1117 !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      border-radius: 20px !important;
-      color: #dce8f8 !important;
-    }
-
-    .swal2-title {
-      font-family: 'Orbitron', sans-serif !important;
-      font-size: 1.15rem !important;
-      letter-spacing: 1px !important;
-    }
-
-    .swal2-html-container {
-      font-size: 1rem !important;
-      line-height: 1.6 !important;
-    }
-
-    .swal2-input {
-      background: #1a2236 !important;
-      border: 1px solid rgba(0, 212, 255, 0.3) !important;
-      border-radius: 10px !important;
-      color: #fff !important;
-      font-family: 'Rajdhani', sans-serif !important;
-      font-size: 1.1rem !important;
-      font-weight: 600 !important;
-    }
-
-    .swal2-input:focus {
-      border-color: var(--hw) !important;
-      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15) !important;
-    }
-
-    .swal2-confirm,
-    .swal2-deny,
-    .swal2-cancel {
-      font-family: 'Orbitron', sans-serif !important;
-      font-size: 0.78rem !important;
-      letter-spacing: 1px !important;
-      border-radius: 10px !important;
-      padding: 0.65rem 1.8rem !important;
-    }
-
-    .swal2-confirm {
-      background: #5c6bc0 !important;
-    }
-
-    /* ── Footer ── */
-    footer {
-      text-align: center;
-      padding: 1.5rem 1rem 2.5rem;
-      font-size: 0.68rem;
-      color: rgba(220, 232, 248, 0.15);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      position: relative;
-      z-index: 2;
-    }
-
-    /* Responsive tweaks */
-    @media (max-width: 500px) {
-      .btn-area {
-        grid-template-columns: 1fr;
-      }
-
-      .hud {
-        gap: 0.6rem;
-      }
-
-      thead th:nth-child(4),
-      tbody td:nth-child(4) {
-        display: none;
-      }
-    }
-
-    /* ── Turma badge ── */
-    .turma-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: linear-gradient(135deg, rgba(92, 107, 192, 0.18), rgba(0, 212, 255, 0.1));
-      border: 1px solid rgba(0, 212, 255, 0.25);
-      border-radius: 50px;
-      padding: 0.3rem 1rem;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.72rem;
-      letter-spacing: 2px;
-      color: var(--hw);
-      margin-top: 0.5rem;
-    }
-
-    .no-turma-warn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: rgba(255, 140, 0, 0.1);
-      border: 1px solid rgba(255, 140, 0, 0.3);
-      border-radius: 50px;
-      padding: 0.3rem 1rem;
-      font-size: 0.72rem;
-      letter-spacing: 1px;
-      color: var(--sw);
-      margin-top: 0.5rem;
-    }
-
-    /* ── Splash / Play screen ── */
-    #splash-overlay {
-      position: absolute;
-      inset: 0;
-      border-radius: 20px;
-      background: linear-gradient(160deg, rgba(7, 9, 15, 0.72) 0%, rgba(13, 17, 23, 0.88) 100%);
-      backdrop-filter: blur(2px);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1.2rem;
-      z-index: 10;
-      cursor: pointer;
-      transition: opacity 0.4s ease;
-    }
-
-    #splash-overlay.hiding {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    /* The big play circle — YouTube-style */
-    .play-btn-circle {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.12);
-      border: 2px solid rgba(255, 255, 255, 0.25);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 0 0 0 rgba(0, 212, 255, 0);
-    }
-
-    /* Ripple ring */
-    .play-btn-circle::before {
-      content: '';
-      position: absolute;
-      inset: -8px;
-      border-radius: 50%;
-      border: 1.5px solid rgba(0, 212, 255, 0.3);
-      animation: ripplePing 2s ease infinite;
-    }
-
-    .play-btn-circle::after {
-      content: '';
-      position: absolute;
-      inset: -18px;
-      border-radius: 50%;
-      border: 1px solid rgba(0, 212, 255, 0.12);
-      animation: ripplePing 2s ease 0.4s infinite;
-    }
-
-    @keyframes ripplePing {
-      0% {
-        transform: scale(1);
-        opacity: 1;
-      }
-
-      100% {
-        transform: scale(1.4);
-        opacity: 0;
-      }
-    }
-
-    /* Triangle play icon */
-    .play-triangle {
-      width: 0;
-      height: 0;
-      border-top: 14px solid transparent;
-      border-bottom: 14px solid transparent;
-      border-left: 24px solid #fff;
-      margin-left: 5px;
-      /* optical center */
-      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.5));
-    }
-
-    #splash-overlay:hover .play-btn-circle {
-      transform: scale(1.1);
-      background: rgba(0, 212, 255, 0.2);
-      border-color: var(--hw);
-      box-shadow: 0 0 40px rgba(0, 212, 255, 0.35);
-    }
-
-    #splash-overlay:hover .play-triangle {
-      border-left-color: var(--hw);
-      filter: drop-shadow(0 0 8px var(--hw));
-    }
-
-    .splash-label {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.78rem;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: rgba(220, 232, 248, 0.6);
-      transition: color 0.2s;
-    }
-
-    #splash-overlay:hover .splash-label {
-      color: var(--hw);
-    }
-
-    /* Make item-card the positioning parent */
-    .item-card {
-      position: relative;
-    }
-
-    /* Hide game controls until started */
-    #game-controls {
-      transition: opacity 0.4s ease;
-    }
-
-    #game-controls.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
+    :root { --hw: #00d4ff; --sw: #ff8c00; --bg: #07090f; --surface: #0d1117; --panel: #131923; --border: rgba(255, 255, 255, 0.07); --text: #dce8f8; --muted: rgba(220, 232, 248, 0.38); --accent: #5c6bc0; --ok: #00e676; --err: #ff1744; --gold: #ffd600; }
+    body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px); background-size: 48px 48px; animation: gridDrift 20s linear infinite; pointer-events: none; z-index: 0; }
+    @keyframes gridDrift { from { background-position: 0 0; } to { background-position: 48px 48px; } }
+    .wrap { position: relative; z-index: 2; max-width: 640px; margin: 0 auto; padding: 1rem; }
+    .site-header { text-align: center; padding: 1rem; }
+    .site-title { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 900; background: linear-gradient(100deg, var(--hw), var(--sw)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hud { display: flex; justify-content: space-around; margin-bottom: 1rem; }
+    .hud-chip { background: var(--panel); border: 1px solid var(--border); border-radius: 50px; padding: 0.4rem 1rem; font-size: 0.8rem; font-weight: 600; }
+    .timer-bar-container { width: 100%; height: 12px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-bottom: 1rem; overflow: hidden; border: 1px solid var(--border); }
+    .timer-bar-fill { height: 100%; background: linear-gradient(90deg, var(--sw), var(--gold)); width: 100%; transition: width 0.1s linear; }
+    .item-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem 2rem; text-align: center; position: relative; margin-bottom: 1rem; min-height: 280px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+    .item-icon { font-size: 4.5rem; display: block; margin-bottom: 1rem; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .item-name { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; font-weight: 800; color: #fff; line-height: 1.2; text-shadow: 0 0 15px rgba(92, 107, 192, 0.5); }
+    .btn-area { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .btn-choice { border: none; border-radius: 16px; padding: 1.2rem; font-family: 'Orbitron', sans-serif; font-size: 0.9rem; font-weight: 800; cursor: pointer; transition: all 0.2s; min-height: 90px; box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
+    .btn-choice:active { transform: translateY(4px); box-shadow: none; }
+    .btn-hw { background: linear-gradient(135deg, #003d4d, #005566); color: var(--hw); border: 1px solid var(--hw); }
+    .btn-sw { background: linear-gradient(135deg, #3d2000, #5a2e00); color: var(--sw); border: 1px solid var(--sw); }
+    .btn-choice:disabled { opacity: 0.3; cursor: not-allowed; }
+    .power-overlay { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 20px; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+    .frozen { background: rgba(0, 212, 255, 0.75); backdrop-filter: blur(12px); border: 4px solid var(--hw); pointer-events: all; }
+    .glopped { background: rgba(0, 230, 118, 0.98); pointer-events: all; cursor: pointer; }
+    .power-active { opacity: 1; }
+    #splash-overlay, #get-ready-screen { position: absolute; inset: 0; border-radius: 20px; background: rgba(7, 9, 15, 0.98); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
+    .hidden { display: none !important; }
+    .ready-title { font-size: 0.8rem; color: var(--muted); letter-spacing: 6px; text-transform: uppercase; margin-bottom: 10px; }
+    .ready-num { font-family: 'Orbitron'; font-size: 5rem; color: var(--gold); text-shadow: 0 0 20px var(--gold); }
   </style>
 </head>
-
 <body>
   <div class="wrap">
-
-    <!-- Header -->
     <header class="site-header">
-      <div class="site-title">⚡ Conhecimento é poder <br> <i>Informática
-          básica</i>
-      </div>
-      <div
-        class="site-sub"
-        id="site-sub"
-      >Nivelamento Informática Básica</div>
+      <div class="site-title">⚡ CONHECIMENTO É PODER</div>
+      <div id="site-sub" style="font-size:0.7rem; color:var(--muted); letter-spacing:2px">SHOW DE TALENTOS</div>
     </header>
 
-    <!-- Already-played banner -->
-    <div id="played-banner">
-      <div class="banner-card">
-        <span class="banner-icon">🏁</span>
-        <div class="banner-title">Você já realizou o desafio desta aula!</div>
-        <div class="banner-sub">Consulte o ranking abaixo para ver sua posição.
-          Boa sorte na próxima aula!</div>
+    <div class="hud">
+      <div class="hud-chip">🏆 <span id="hud-pts">0 pts</span></div>
+      <div class="hud-chip">🎮 <span id="q-label">Aguardando...</span></div>
+    </div>
+
+    <div class="timer-bar-container"><div id="timer-bar-fill" class="timer-bar-fill"></div></div>
+
+    <div class="item-card" id="item-card">
+      <div id="power-overlay" class="power-overlay" onclick="cleanGloop()">
+        <div id="power-msg" style="font-family:'Orbitron'; font-size:1.8rem; color:#fff; text-shadow:0 0 20px #000; margin-bottom:10px;"></div>
+        <div id="power-sub" style="font-size:1rem; color:rgba(255,255,255,0.9); font-weight:600"></div>
+      </div>
+
+      <div id="splash-overlay">
+        <div style="font-size:4rem; animation: pulse 2s infinite">🎮</div>
+        <span style="font-family:'Orbitron'; letter-spacing:2px; color:var(--hw)">AGUARDANDO O HOST...</span>
+      </div>
+
+      <div id="question-content" class="hidden">
+        <span class="item-icon" id="item-icon">⚡</span>
+        <div class="item-name" id="item-name">...</div>
+      </div>
+
+      <div id="get-ready-screen" class="hidden">
+        <div class="ready-title" id="ready-label">RODADA 1</div>
+        <div class="ready-num" id="get-ready-timer">5</div>
       </div>
     </div>
 
-    <!-- Bootstrap Tabs Navigation -->
-    <ul
-      class="nav nav-tabs"
-      id="mainTabs"
-      role="tablist"
-    >
-      <li
-        class="nav-item"
-        role="presentation"
-      >
-        <button
-          class="nav-link active"
-          id="game-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#game-pane"
-          type="button"
-          role="tab"
-        >🎮 Jogo</button>
-      </li>
-      <li
-        class="nav-item"
-        role="presentation"
-      >
-        <button
-          class="nav-link"
-          id="daily-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#daily-pane"
-          type="button"
-          role="tab"
-          onclick="loadRanking('diario')"
-        >📅 Ranking da Aula</button>
-      </li>
-      <li
-        class="nav-item"
-        role="presentation"
-      >
-        <button
-          class="nav-link"
-          id="all-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#all-pane"
-          type="button"
-          role="tab"
-          onclick="loadRanking('geral')"
-        >🏆 Ranking Geral</button>
-      </li>
-    </ul>
-
-    <div class="tab-content">
-
-      <!-- ── TAB JOGO ── -->
-      <div
-        class="tab-pane fade show active"
-        id="game-pane"
-        role="tabpanel"
-      >
-        <div id="game-section">
-
-          <!-- HUD -->
-          <div class="hud">
-            <div
-              class="hud-chip"
-              style="display: none;"
-            >⏱️ Tempo <span
-                class="val val-timer"
-                id="timer-display"
-              >00:00</span></div>
-            <div class="hud-chip">✅ Acertos <span
-                class="val val-green"
-                id="hud-hits"
-              >0</span></div>
-            <div class="hud-chip">❌ Erros <span
-                class="val val-orange"
-                id="hud-errs"
-              >0</span></div>
-            <div class="hud-chip">🎯 Precisão <span
-                class="val val-blue"
-                id="hud-acc"
-              >–</span></div>
-          </div>
-
-          <!-- Progress -->
-          <div class="progress-wrap">
-            <div class="progress-meta">
-              <span>Progresso</span>
-              <span id="prog-label">0 / 15</span>
-            </div>
-            <div class="progress">
-              <div
-                class="progress-bar"
-                id="progress-bar"
-                style="width:0%"
-              ></div>
-            </div>
-          </div>
-
-          <!-- Question counter -->
-          <p
-            class="q-label"
-            id="q-label"
-          >Questão 1 de 15</p>
-
-          <!-- Item card -->
-          <div
-            class="item-card slide-up"
-            id="item-card"
-          >
-
-            <!-- Play overlay — YouTube style -->
-            <div
-              id="splash-overlay"
-              onclick="launchGame()"
-            >
-              <div class="play-btn-circle">
-                <div class="play-triangle"></div>
-              </div>
-              <span class="splash-label">Clique para iniciar</span>
-            </div>
-
-            <span
-              class="item-icon"
-              id="item-icon"
-            >⚡</span>
-            <div
-              class="item-name"
-              id="item-name"
-            >Pronto para jogar?</div>
-          </div>
-
-          <!-- Answer buttons (hidden until game starts) -->
-          <div
-            id="game-controls"
-            class="hidden"
-          >
-            <div class="btn-area">
-              <button
-                class="btn-choice btn-hw"
-                id="btn-hw"
-                onclick="answer('hardware')"
-              >
-                <span class="btn-emoji">💻</span>HARDWARE
-              </button>
-              <button
-                class="btn-choice btn-sw"
-                id="btn-sw"
-                onclick="answer('software')"
-              >
-                <span class="btn-emoji">💿</span>SOFTWARE
-              </button>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ── TAB RANKING DIÁRIO ── -->
-      <div
-        class="tab-pane fade"
-        id="daily-pane"
-        role="tabpanel"
-      >
-        <div id="ranking-section">
-          <div class="rank-table-wrap">
-            <div
-              id="rank-filter-bar"
-              style="padding:0.8rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:0.8rem;flex-wrap:wrap;"
-            >
-              <div style="display:flex;align-items:center;gap:0.8rem;">
-                <span
-                  style="font-size:0.72rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase"
-                >Filtrar turma:</span>
-                <select
-                  id="turma-filter"
-                  onchange="onTurmaFilterChange()"
-                  style="background:var(--panel);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:0.88rem;padding:0.3rem 0.7rem;cursor:pointer;"
-                >
-                  <option value="">Todas as turmas</option>
-                </select>
-              </div>
-              <button
-                onclick="refreshActiveRanking()"
-                style="background:rgba(92,107,192,0.2);border:1px solid var(--accent);border-radius:8px;color:var(--hw);font-family:'Orbitron',sans-serif;font-size:0.65rem;padding:0.4rem 0.8rem;cursor:pointer;letter-spacing:1px;transition:all 0.2s;"
-              >
-                🔄 ATUALIZAR AGORA
-              </button>
-            </div>
-            <div
-              id="daily-content"
-              class="rank-loading"
-            >⏳ Carregando ranking da aula...</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── TAB RANKING GERAL ── -->
-      <div
-        class="tab-pane fade"
-        id="all-pane"
-        role="tabpanel"
-      >
-        <div id="ranking-section">
-          <div class="rank-table-wrap">
-            <div
-              id="all-filter-bar"
-              style="padding:0.8rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:0.8rem;flex-wrap:wrap;"
-            >
-              <div style="display:flex;align-items:center;gap:0.8rem;">
-                <span
-                  style="font-size:0.72rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase"
-                >Filtrar turma:</span>
-                <select
-                  id="turma-filter-all"
-                  onchange="onTurmaFilterChange('all')"
-                  style="background:var(--panel);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:0.88rem;padding:0.3rem 0.7rem;cursor:pointer;"
-                >
-                  <option value="">Todas as turmas</option>
-                </select>
-              </div>
-              <button
-                onclick="refreshActiveRanking()"
-                style="background:rgba(92,107,192,0.2);border:1px solid var(--accent);border-radius:8px;color:var(--hw);font-family:'Orbitron',sans-serif;font-size:0.65rem;padding:0.4rem 0.8rem;cursor:pointer;letter-spacing:1px;transition:all 0.2s;"
-              >
-                🔄 ATUALIZAR AMBOS
-              </button>
-            </div>
-            <div
-              id="all-content"
-              class="rank-loading"
-            >⏳ Carregando ranking geral...</div>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /tab-content -->
-
-    <footer>Desenvolvido para fins educacionais
-    </footer>
+    <div id="game-controls" class="hidden">
+      <div class="btn-area" id="btn-area"></div>
+    </div>
   </div>
 
-  <!-- Bootstrap JS -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-  ></script>
-
   <script>
-    /* ══════════════════════════════════════════════
-       DATA
-    ══════════════════════════════════════════════ */
-    // Configuração de categorias (Agora as opções vêm de cada item)
     const ITEMS = [
-      {
-        question: "Qual atalho (comando) usamos para COPIAR um texto ou arquivo no Windows?",
-        icon: "📋",
-        options: [
-          { label: "CTRL + C", isCorrect: true, feedback: "Exato! O comando CTRL + C copia o conteúdo selecionado para a área de transferência." },
-          { label: "CTRL + Z", isCorrect: false, feedback: "Ops! CTRL + Z serve para DESFAZER a última ação. Para copiar, o comando é CTRL + C." }
-        ]
-      },
-      {
-        question: "Quero abrir o Histórico da Área de Transferência (ver tudo que copiei). Qual comando uso?",
-        icon: "📋",
-        options: [
-          { label: "WINDOWS + V", isCorrect: true, feedback: "Correto! O comando Win+V abre o histórico de tudo que você copiou recentemente no Windows." },
-          { label: "WINDOWS + C", isCorrect: false, feedback: "Não... Antigamente o Win+C abria a Cortana. O comando correto para a área de transferência é Win+V." }
-        ]
-      },
-      {
-        question: "A Memória RAM é qual categoria de componente do computador?",
-        icon: "🧠",
-        options: [
-          { label: "Hardware", isCorrect: true, feedback: "Correto! A RAM é um componente físico (um chip de silício) instalado na placa-mãe." },
-          { label: "Software", isCorrect: false, feedback: "Não! Software são programas e códigos. A RAM é um componente físico tangível, logo é Hardware." }
-        ]
-      },
-      {
-        question: "O Sistema Operacional (ex: Windows, Linux) é considerado:",
-        icon: "🖥️",
-        options: [
-          { label: "Software", isCorrect: true, feedback: "Isso mesmo! O S.O. é um conjunto de programas que gerencia os recursos do computador." },
-          { label: "Hardware", isCorrect: false, feedback: "Cuidado! O S.O. é um conjunto de instruções lógicas (código), por isso é Software." }
-        ]
-      },
-      {
-        question: "Qual atalho usamos para COLAR um conteúdo que foi previamente copiado?",
-        icon: "📥",
-        options: [
-          { label: "CTRL + V", isCorrect: true, feedback: "Perfeito! CTRL + V insere o conteúdo da área de transferência no local selecionado." },
-          { label: "CTRL + P", isCorrect: false, feedback: "Não... CTRL + P é o atalho para IMPRIMIR (Print). Para colar, usamos CTRL + V." }
-        ]
-      },
-      {
-        question: "Um Pendrive ou HD Externo são dispositivos de:",
-        icon: "💾",
-        options: [
-          { label: "Armazenamento", isCorrect: true, feedback: "Correto! Eles servem para guardar arquivos de forma permanente (memória secundária)." },
-          { label: "Processamento", isCorrect: false, feedback: "Não. O processamento é feito pela CPU. Pendrives e HDs servem para guardar (armazenar) dados." }
-        ]
-      },
-      {
-        question: "O Google Chrome e o Microsoft Edge são exemplos de:",
-        icon: "🌐",
-        options: [
-          { label: "Navegadores (Software)", isCorrect: true, feedback: "Exato! São aplicativos usados para acessar e visualizar páginas na internet." },
-          { label: "Provedores de Internet", isCorrect: false, feedback: "Não. Provedores são as empresas que fornecem o sinal. Chrome e Edge são os programas (Navegadores)." }
-        ]
-      },
-      {
-        question: "Qual componente é conhecido como o 'Cérebro' do computador?",
-        icon: "⚙️",
-        options: [
-          { label: "CPU (Processador)", isCorrect: true, feedback: "Correto! A CPU (Unidade Central de Processamento) executa todos os cálculos e instruções." },
-          { label: "Placa de Vídeo", isCorrect: false, feedback: "Não. A Placa de Vídeo foca em imagens. O 'cérebro' geral é o Processador (CPU)." }
-        ]
-      },
-      {
-        question: "O Monitor e a Impressora são dispositivos de:",
-        icon: "🖨️",
-        options: [
-          { label: "Saída", isCorrect: true, feedback: "Sim! Eles retiram a informação de dentro do computador e mostram ou entregam ao usuário." },
-          { label: "Entrada", isCorrect: false, feedback: "Não. Dispositivos de entrada (como teclado) enviam dados PARA o computador." }
-        ]
-      },
-      {
-        question: "Qual atalho fecha a janela ou o programa que está ativo no momento?",
-        icon: "❌",
-        options: [
-          { label: "ALT + F4", isCorrect: true, feedback: "Isso! ALT + F4 é o comando clássico para fechar janelas no Windows." },
-          { label: "ALT + TAB", isCorrect: false, feedback: "Quase! ALT + TAB serve para ALTERNAR entre janelas abertas, não para fechá-las." }
-        ]
-      },
-      {
-        question: "O Teclado e o Mouse são dispositivos de:",
-        icon: "⌨️",
-        options: [
-          { label: "Entrada", isCorrect: true, feedback: "Correto! Eles servem para enviar comandos e dados do usuário PARA dentro do computador." },
-          { label: "Saída", isCorrect: false, feedback: "Não. Saída é quando o PC nos envia algo (como som ou imagem). Teclado envia dados PARA o PC." }
-        ]
-      },
-      {
-        question: "O que significa a sigla CPU?",
-        icon: "📟",
-        options: [
-          { label: "Central Processing Unit", isCorrect: true, feedback: "Exato! Em português: Unidade Central de Processamento." },
-          { label: "Computer Personal Unit", isCorrect: false, feedback: "Incorreto. A sigla correta para o processador é Central Processing Unit." }
-        ]
-      },
-      {
-        question: "Qual destes é um Software de edição de textos (escrita)?",
-        icon: "📝",
-        options: [
-          { label: "Microsoft Word", isCorrect: true, feedback: "Correto! O Word é o editor de textos mais popular do mundo." },
-          { label: "Microsoft Excel", isCorrect: false, feedback: "Não. O Excel é focado em planilhas e cálculos. Para textos, o Word é o ideal." }
-        ]
-      },
-      {
-        question: "Para selecionar TODO o texto de um documento de uma vez, qual atalho uso?",
-        icon: "📑",
-        options: [
-          { label: "CTRL + A", isCorrect: true, feedback: "Isso! No Windows, CTRL + A (All) seleciona tudo que está na tela ou documento." },
-          { label: "CTRL + T", isCorrect: false, feedback: "Atenção! No Windows em português, CTRL+A seleciona tudo. CTRL+T abre nova aba em navegadores." }
-        ]
-      },
-      {
-        question: "A Placa-Mãe (Motherboard) tem a função de:",
-        icon: "🔌",
-        options: [
-          { label: "Conectar todos os componentes", isCorrect: true, feedback: "Exato! Ela é a base física onde todos os outros componentes são instalados e interligados." },
-          { label: "Apenas fornecer energia", isCorrect: false, feedback: "Não. Quem fornece energia é a Fonte. A Placa-mãe interconecta todos os dados entre os componentes." }
-        ]
-      },
+      { question: "Qual atalho usamos para COPIAR um texto ou arquivo no Windows?", icon: "📋", options: [{ label: "CTRL + C", isCorrect: true, feedback: "Correto! C de Copy." }, { label: "CTRL + V", isCorrect: false, feedback: "Não! CTRL+V serve para COLAR." }, { label: "CTRL + X", isCorrect: false, feedback: "Errado! CTRL+X Recorta." }, { label: "CTRL + Z", isCorrect: false, feedback: "Não! CTRL+Z Desfaz." }] },
+      { question: "Qual componente é conhecido como o 'Cérebro' do computador?", icon: "⚙️", options: [{ label: "CPU", isCorrect: true, feedback: "Exato! A CPU processa tudo." }, { label: "RAM", isCorrect: false, feedback: "Não! RAM é memória temporária." }, { label: "HD", isCorrect: false, feedback: "Errado! HD guarda arquivos." }, { label: "Placa-Mãe", isCorrect: false, feedback: "Não! Ela apenas conecta as peças." }] },
+      { question: "O Windows, Linux e o macOS são exemplos de:", icon: "🖥️", options: [{ label: "Sistemas Operacionais", isCorrect: true, feedback: "Isso! Eles gerenciam o PC." }, { label: "Navegadores", isCorrect: false, feedback: "Não! Navegadores são Chrome/Edge." }, { label: "Hardwares", isCorrect: false, feedback: "Errado! São programas (Softwares)." }, { label: "Jogos", isCorrect: false, feedback: "Não! São softwares de base." }] },
+      { question: "Qual dispositivo é de SAÍDA de dados?", icon: "🔊", options: [{ label: "Monitor", isCorrect: true, feedback: "Correto! Ele exibe a imagem." }, { label: "Teclado", isCorrect: false, feedback: "Não! Teclado é de Entrada." }, { label: "Mouse", isCorrect: false, feedback: "Não! Mouse é de Entrada." }, { label: "Microfone", isCorrect: false, feedback: "Errado! Microfone é Entrada." }] },
+      { question: "Para que serve o atalho ALT + TAB?", icon: "🔄", options: [{ label: "Alternar janelas", isCorrect: true, feedback: "Isso! Navega entre programas abertos." }, { label: "Fechar janelas", isCorrect: false, feedback: "Não! Para fechar é ALT+F4." }, { label: "Salvar", isCorrect: false, feedback: "Não! Salvar é CTRL+S." }, { label: "Reiniciar", isCorrect: false, feedback: "Errado! Não há atalho para isso." }] },
+      { question: "Qual destes é um Software de edição de textos?", icon: "📝", options: [{ label: "Word", isCorrect: true, feedback: "Correto!" }, { label: "Excel", isCorrect: false, feedback: "Excel é para planilhas." }, { label: "Chrome", isCorrect: false, feedback: "Chrome é navegador." }, { label: "Spotify", isCorrect: false, feedback: "Spotify é música." }] },
+      { question: "A Memória RAM armazena dados:", icon: "🧠", options: [{ label: "Temporariamente", isCorrect: true, feedback: "Exato! Apaga ao desligar." }, { label: "Para sempre", isCorrect: false, feedback: "Não! Isso é o HD/SSD." }, { label: "Na nuvem", isCorrect: false, feedback: "Não! RAM é física no PC." }, { label: "De vídeo apenas", isCorrect: false, feedback: "Não! RAM é geral." }] },
+      { question: "Atalho para salvar um arquivo (padrão Windows):", icon: "💾", options: [{ label: "CTRL + S", isCorrect: true, feedback: "Correto! S de Save." }, { label: "CTRL + P", isCorrect: false, feedback: "P é para Imprimir." }, { label: "CTRL + O", isCorrect: false, feedback: "O é para Abrir." }, { label: "CTRL + N", isCorrect: false, feedback: "N é para Novo." }] },
+      { question: "Onde ficam guardados os arquivos permanentemente?", icon: "💾", options: [{ label: "HD ou SSD", isCorrect: true, feedback: "Correto!" }, { label: "RAM", isCorrect: false, feedback: "Não! RAM é volátil." }, { label: "Processador", isCorrect: false, feedback: "Processador não guarda arquivos." }, { label: "Teclado", isCorrect: false, feedback: "Teclado é para digitar." }] },
+      { question: "Dispositivo usado para capturar imagens físicas para o PC:", icon: "📷", options: [{ label: "Scanner", isCorrect: true, feedback: "Isso!" }, { label: "Impressora", isCorrect: false, feedback: "Impressora faz o oposto." }, { label: "Monitor", isCorrect: false, feedback: "Monitor exibe, não captura." }, { label: "Fone de Ouvido", isCorrect: false, feedback: "Não!" }] },
+      { question: "O que significa WWW?", icon: "🌐", options: [{ label: "World Wide Web", isCorrect: true, feedback: "Correto!" }, { label: "Wide World Web", isCorrect: false, feedback: "Não!" }, { label: "Web World Wide", isCorrect: false, feedback: "Não!" }, { label: "Web Wide World", isCorrect: false, feedback: "Não!" }] },
+      { question: "Atalho para selecionar TUDO:", icon: "📑", options: [{ label: "CTRL + A", isCorrect: true, feedback: "Correto! A de All." }, { label: "CTRL + T", isCorrect: false, feedback: "T é para novas abas." }, { label: "CTRL + C", isCorrect: false, feedback: "C é copiar." }, { label: "CTRL + V", isCorrect: false, feedback: "V é colar." }] },
+      { question: "O principal buscador da internet é o:", icon: "🔍", options: [{ label: "Google", isCorrect: true, feedback: "Exato!" }, { label: "Facebook", isCorrect: false, feedback: "É rede social." }, { label: "WhatsApp", isCorrect: false, feedback: "É mensageiro." }, { label: "Instagram", isCorrect: false, feedback: "É fotos/vídeos." }] },
+      { question: "Qual atalho fecha a janela atual?", icon: "❌", options: [{ label: "ALT + F4", isCorrect: true, feedback: "Correto!" }, { label: "ALT + TAB", isCorrect: false, feedback: "Alterna janelas." }, { label: "CTRL + C", isCorrect: false, feedback: "Copiar." }, { label: "Win + D", isCorrect: false, feedback: "Mostra área de trabalho." }] },
+      { question: "A peça onde tudo se conecta no PC é a:", icon: "🔌", options: [{ label: "Placa-Mãe", isCorrect: true, feedback: "Exato!" }, { label: "Fonte", isCorrect: false, feedback: "Dá energia." }, { label: "Processador", isCorrect: false, feedback: "É o cérebro." }, { label: "Gabinete", isCorrect: false, feedback: "É apenas a caixa." }] }
     ];
 
-    /* ══════════════════════════════════════════════
-       STATE
-    ══════════════════════════════════════════════ */
-    let shuffled = [], current = 0, hits = 0, misses = 0;
-    let answered = false, gameOver = false;
-    let timerInterval = null, elapsedSeconds = 0;
-    
-    // Novas variáveis para controle pedagógico
-    let alunoId = null, nomeAluno = '', turmaAluno = '';
-    let respostasDadas = [];
+    let current = 0, totalPoints = 0, answered = false, gameOver = false, timerInterval = null, timeLeft = 100;
+    let isMultiplayer = false, sessaoId = null, jogadorIdMulti = null, lastSyncIndex = -1, nomeUser = '';
 
-    /* ── Params detection ── */
-    const URL_PARAMS = new URLSearchParams(window.location.search);
-    const TURMA = (URL_PARAMS.get('turma') || '').trim();
-    const TEMA = (URL_PARAMS.get('tema') || 'geral').trim();
-
-    // A chave agora é única por TEMA e TURMA
-    const LS_KEY = `quiz_v1_${TEMA}_${TURMA || 'sem_turma'}`;
-
-    /* ══════════════════════════════════════════════
-       UI & INITIALIZATION
-    ══════════════════════════════════════════════ */
-    function updateHeaderInfo() {
-      // Show info in subtitle
-      const subEl = document.getElementById('site-sub');
-      const temaFormatado = TEMA.replace(/_/g, ' ').toUpperCase();
-
-      let label = `Desafio: ${temaFormatado}`;
-      if (TURMA) {
-        label += ` &nbsp;<span class="turma-badge">🏫 Turma ${escHtml(TURMA)}</span>`;
-      } else {
-        label += ` &nbsp;<span class="no-turma-warn">⚠️ Sem turma definida</span>`;
-      }
-      subEl.innerHTML = label;
-    }
-
-    function showAlreadyPlayedUI() {
-      document.getElementById('played-banner').style.display = 'block';
-      document.getElementById('game-section').style.display = 'none';
-      const tab = new bootstrap.Tab(document.getElementById('daily-tab'));
-      tab.show();
-      rankingTurmaFilter = TURMA;
-      loadRanking('diario');
-    }
-
-    /* ══════════════════════════════════════════════
-       TIMER
-    ══════════════════════════════════════════════ */
-    function startTimer(reset = true) {
-      if (reset) elapsedSeconds = 0;
-      clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        elapsedSeconds++;
-        updateTimerDisplay();
-      }, 1000);
-    }
-
-    function stopTimer() {
-      clearInterval(timerInterval);
-    }
-
-    function updateTimerDisplay() {
-      const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
-      const s = String(elapsedSeconds % 60).padStart(2, '0');
-      const el = document.getElementById('timer-display');
-      el.textContent = `${m}:${s}`;
-      el.className = 'val val-timer' + (elapsedSeconds > 120 ? ' timer-urgent' : '');
-    }
-
-    function fmtTime(s) {
-      const m = Math.floor(s / 60), sec = s % 60;
-      return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
-    }
-
-    /* ══════════════════════════════════════════════
-       GAME LOGIC
-    ══════════════════════════════════════════════ */
     function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
 
-    /* prepGame: called on load — shuffles, renders first card, but does NOT start timer */
-    function prepGame() {
-      shuffled = shuffle(ITEMS);
-      current = 0; hits = 0; misses = 0;
-      answered = false; gameOver = false;
-      elapsedSeconds = 0;
-      updateHUD(); updateProgress();
-      renderQuestion(true); // true = keep overlay visible
+    window.onload = async () => {
+      const { value: mode } = await Swal.fire({ title: '⚡ BEM-VINDO', text: 'ESCOLHA SEU MODO:', showDenyButton: true, confirmButtonText: 'SOLO', denyButtonText: 'DUELO', confirmButtonColor: '#5c6bc0', denyButtonColor: '#ff8c00', allowOutsideClick: false });
+      isMultiplayer = mode === false;
+      const { value: form } = await Swal.fire({ title: 'IDENTIFIQUE-SE', html: `<input id="n" class="swal2-input" placeholder="Seu Nome"><input id="c" class="swal2-input" placeholder="${isMultiplayer ? 'Código da Sala' : 'Sua Turma'}">`, preConfirm: () => ({ nome: document.getElementById('n').value, extra: document.getElementById('c').value }), allowOutsideClick: false });
+      nomeUser = form.nome;
+      if (isMultiplayer) {
+        const res = await axios.post('api_player.php?action=entrar', { nome: form.nome, codigo: form.extra });
+        if (res.data.sucesso) { sessaoId = res.data.sessao_id; jogadorIdMulti = res.data.jogador_id; startSyncPolling(); }
+        else { Swal.fire('Erro', res.data.erro, 'error').then(() => location.reload()); }
+      } else { 
+        ITEMS.forEach(it => it._curOps = shuffle(it.options));
+        document.getElementById('splash-overlay').classList.add('hidden'); 
+        renderQuestion(); 
+      }
+    };
+
+    function startSyncPolling() {
+      const poller = setInterval(async () => {
+        if (gameOver) { clearInterval(poller); return; }
+        try {
+          const res = await axios.get(`api_player.php?action=status&sessao_id=${sessaoId}&jogador_id=${jogadorIdMulti}`);
+          if (res.data.encerrada) { gameOver = true; clearInterval(poller); Swal.close(); showFinalRanking(); return; }
+          
+          const remoteIdx = parseInt(res.data.sessao.indice_pergunta_atual);
+          if (remoteIdx > lastSyncIndex) {
+            lastSyncIndex = remoteIdx; current = remoteIdx;
+            if (Swal.isVisible()) Swal.close();
+            document.getElementById('splash-overlay').classList.add('hidden');
+            await flowPerguntaCEP(res.data.ataque, res.data.quem_atacou);
+          }
+        } catch (e) { console.error("Erro na conexão"); }
+      }, 1500);
     }
 
-    /* startGame: full reset including timer — used after endGame restart */
-    function startGame() {
-      // Reset splash for replay
-      const overlay = document.getElementById('splash-overlay');
-      const controls = document.getElementById('game-controls');
-      overlay.style.display = 'flex';
-      overlay.classList.remove('hiding');
-      controls.classList.add('hidden');
+    async function flowPerguntaCEP(ataqueRecebido, quemAtacou) {
+      document.getElementById('question-content').classList.add('hidden');
+      document.getElementById('game-controls').classList.add('hidden');
 
-      shuffled = shuffle(ITEMS);
-      current = 0; hits = 0; misses = 0;
-      answered = false; gameOver = false;
-      elapsedSeconds = 0;
-      updateTimerDisplay();
-      updateHUD(); updateProgress();
-      renderQuestion(true);
+      // 1. Fase de Poderes
+      await Swal.fire({
+        title: 'ESCOLHA SEU PODER',
+        html: '<div class="d-grid gap-2"><button class="btn btn-info py-3" onclick="lancarPoder(\'ice\')">❄️ GELO</button><button class="btn btn-success py-3" onclick="lancarPoder(\'gloop\')">🟢 GOSMA</button><button class="btn btn-secondary py-3" onclick="Swal.clickConfirm()">NENHUM</button></div>',
+        showConfirmButton: false, timer: 8000, timerProgressBar: true, allowOutsideClick: false
+      });
+
+      // 2. Revelação de Ataques
+      if (ataqueRecebido) {
+        const icon = ataqueRecebido === 'ice' ? '❄️' : '🟢';
+        await Swal.fire({
+          title: `${icon} CUIDADO! ${icon}`,
+          html: `<h2 style="color:var(--err)">${ataqueRecebido === 'ice' ? 'CONGELADO!' : 'GOSMA!'}</h2><p><b>${quemAtacou.toUpperCase()}</b> LANÇOU EM VOCÊ!</p>`,
+          timer: 3500, showConfirmButton: false, allowOutsideClick: false,
+          didOpen: () => applyPowerEffect(ataqueRecebido, quemAtacou)
+        });
+      }
+
+      // 3. Get Ready
+      document.getElementById('ready-label').textContent = `RODADA ${current + 1}`;
+      document.getElementById('get-ready-screen').classList.remove('hidden');
+      let count = 5;
+      const readyTimer = document.getElementById('get-ready-timer');
+      readyTimer.textContent = count;
+
+      return new Promise(resolve => {
+        const interval = setInterval(() => {
+          count--; readyTimer.textContent = count;
+          if (count <= 0) {
+            clearInterval(interval);
+            document.getElementById('get-ready-screen').classList.add('hidden');
+            renderQuestion();
+            resolve();
+          }
+        }, 1000);
+      });
     }
 
-    function renderQuestion(keepOverlay) {
-      if (current >= shuffled.length) { endGame(); return; }
-      answered = false;
+    async function lancarPoder(tipo) {
+      const res = await axios.get(`api_player.php?action=listar_oponentes&sessao_id=${sessaoId}&jogador_id=${jogadorIdMulti}`);
+      const oponentes = res.data.jogadores;
+      if (oponentes.length === 0) { Swal.clickConfirm(); return; }
+      const { value: alvo } = await Swal.fire({ title: 'QUEM SERÁ A VÍTIMA?', input: 'select', inputOptions: Object.fromEntries(oponentes.map(o => [o.id, o.nome])), showCancelButton: false, confirmButtonColor: '#5c6bc0' });
+      if (alvo) await axios.post('api_player.php?action=atacar', { alvo_id: alvo, tipo: tipo, meu_nome: nomeUser });
+      Swal.clickConfirm();
+    }
 
-      const q = shuffled[current];
-      const card = document.getElementById('item-card');
-      card.classList.remove('slide-up', 'flash-ok', 'flash-err');
-      void card.offsetWidth;
-      card.classList.add('slide-up');
-
+    function renderQuestion() {
+      if (current >= ITEMS.length) { if(!isMultiplayer) showFinalRanking(); return; }
+      answered = false; const q = ITEMS[current];
+      document.getElementById('question-content').classList.remove('hidden');
+      document.getElementById('game-controls').classList.remove('hidden');
       document.getElementById('item-icon').textContent = q.icon;
       document.getElementById('item-name').textContent = q.question;
-      document.getElementById('q-label').textContent = `Questão ${current + 1} de ${shuffled.length}`;
+      document.getElementById('q-label').textContent = `Questão ${current + 1}/15`;
+      if (!q._curOps) q._curOps = shuffle(q.options);
+      document.getElementById('btn-area').innerHTML = q._curOps.map((o, i) => `<button class="btn-choice ${i % 2 === 0 ? 'btn-hw' : 'btn-sw'}" onclick="answer(${i})">${o.label}</button>`).join('');
+      setButtons(false); startTimer();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval); timeLeft = 100;
+      timerInterval = setInterval(() => {
+        timeLeft -= 0.7; document.getElementById('timer-bar-fill').style.width = timeLeft + '%';
+        if (timeLeft <= 0) { clearInterval(timerInterval); answer(-1); }
+      }, 100);
+    }
+
+    async function answer(idx) {
+      if (answered) return; answered = true; clearInterval(timerInterval); setButtons(true);
+      const q = ITEMS[current];
+      const sel = idx === -1 ? { isCorrect: false, feedback: "Tempo esgotado!" } : q._curOps[idx];
+      let pts = sel.isCorrect ? Math.max(10, Math.round(timeLeft)) : 0;
+      if (sel.isCorrect) totalPoints += pts;
+      document.getElementById('hud-pts').textContent = totalPoints + " pts";
+      if (isMultiplayer) await axios.post('api_player.php?action=responder', { jogador_id: jogadorIdMulti, pontos: pts });
       
-      // Gera os botões dinamicamente
-      const btnArea = document.querySelector('.btn-area');
-      btnArea.innerHTML = q.options.map((opt, idx) => {
-        const colorClass = idx % 2 === 0 ? 'btn-hw' : 'btn-sw';
-        return `
-          <button class="btn-choice ${colorClass}" onclick="answer(${idx})">
-            ${opt.label.toUpperCase()}
-          </button>
-        `;
+      Swal.fire({ icon: sel.isCorrect ? 'success' : 'error', title: sel.isCorrect ? `+${pts} PONTOS` : 'ERROU!', text: sel.feedback, showConfirmButton: false, timer: 3000 }).then(() => {
+        if (!isMultiplayer) { current++; renderQuestion(); }
+        else showMiniRanking();
+      });
+    }
+
+    async function showMiniRanking() {
+      const res = await axios.get(`api_host.php?action=status&sessao_id=${sessaoId}`);
+      const list = res.data.jogadores;
+      const me = list.find(j => j.nome === nomeUser);
+      const pos = list.indexOf(me) + 1;
+      Swal.fire({ title: 'SUA POSIÇÃO', html: `<h1 style="font-size:5rem; color:var(--gold)">${pos}º</h1><p style="letter-spacing:2px">${totalPoints} PONTOS</p>`, timer: 4000, showConfirmButton: false });
+    }
+
+    async function showFinalRanking() {
+      clearInterval(timerInterval);
+      const res = await axios.get(`api_host.php?action=status&sessao_id=${sessaoId}`);
+      const ranks = res.data.jogadores || [];
+      const html = ranks.map((r, i) => {
+        const color = i === 0 ? 'var(--gold)' : (i === 1 ? '# silver' : (i === 2 ? '#cd7f32' : '#fff'));
+        return `<div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #333; color:${color}; font-weight:bold;"><span>${i+1}º ${r.nome.toUpperCase()}</span> <span>${r.pontuacao} PTS</span></div>`;
       }).join('');
-
-      // Desabilitar se estiver no splash
-      if (!keepOverlay) setButtons(false);
-      else setButtons(true);
-
-      updateProgress();
+      await Swal.fire({ title: '🏆 PÓDIO FINAL 🏆', html: html || `Fim de jogo!`, confirmButtonText: 'VOLTAR AO INÍCIO', confirmButtonColor: '#5c6bc0' });
+      location.reload();
     }
 
-    function answer(optionIdx) {
-      if (answered || gameOver) return;
-      answered = true;
-      setButtons(true);
-      stopTimer(); // Pausa o tempo para leitura do feedback
-
-      const q = shuffled[current];
-      const selected = q.options[optionIdx];
-      const ok = selected.isCorrect;
-      const card = document.getElementById('item-card');
-
-      if (ok) hits++;
-      else misses++;
-      updateHUD();
-
-      // REGISTRO PEDAGÓGICO: Salva o detalhamento da resposta
-      respostasDadas.push({
-        questao: q.question,
-        resposta: selected.label,
-        correta: ok
-      });
-
-      card.classList.add(ok ? 'flash-ok' : 'flash-err');
-
-      // Busca a opção correta para exibição em caso de erro
-      const correta = q.options.find(o => o.isCorrect);
-
-      if (ok) {
-        Swal.fire({
-          icon: 'success', iconColor: '#00e676',
-          title: '✅ Correto!',
-          html: `
-            <div style="font-family:'Rajdhani',sans-serif; text-align:center;">
-              <div style="font-size:1.1rem; color:var(--ok); font-family:'Orbitron',sans-serif; margin-bottom:10px;">${selected.label.toUpperCase()}</div>
-              <div style="color:rgba(220,232,248,.75); font-size:1rem; line-height:1.4;">${selected.feedback}</div>
-            </div>`,
-          confirmButtonText: current + 1 < shuffled.length ? 'ENTENDI, PRÓXIMA ›' : 'VER MEU DESEMPENHO ›',
-          confirmButtonColor: '#5c6bc0',
-          allowOutsideClick: false,
-        }).then(() => {
-          current++;
-          if (current < shuffled.length) {
-            startTimer(false); 
-            renderQuestion();
-          } else {
-            endGame();
-          }
-        });
-      } else {
-        Swal.fire({
-          icon: 'error', iconColor: '#ff1744',
-          title: '❌ Ops! Errado',
-          html: `
-            <div style="font-family:'Rajdhani',sans-serif; text-align:center;">
-              <div style="font-size:0.9rem; color:var(--muted); margin-bottom:5px;">Você escolheu: ${selected.label}</div>
-              <div style="font-size:1.1rem; color:var(--ok); font-family:'Orbitron',sans-serif; margin-bottom:10px;">Correto: ${correta.label.toUpperCase()}</div>
-              <div style="color:rgba(220,232,248,.75); font-size:1rem; line-height:1.4;">${selected.feedback}</div>
-            </div>`,
-          confirmButtonText: current + 1 < shuffled.length ? 'ENTENDI, CONTINUAR ›' : 'VER MEU DESEMPENHO ›',
-          confirmButtonColor: '#5c6bc0',
-          allowOutsideClick: false,
-        }).then(() => {
-          current++;
-          if (current < shuffled.length) {
-            startTimer(false);
-            renderQuestion();
-          } else {
-            endGame();
-          }
-        });
-      }
+    function applyPowerEffect(t, quem) {
+      const o = document.getElementById('power-overlay'); o.className = 'power-overlay power-active ' + (t === 'ice' ? 'frozen' : 'glopped');
+      document.getElementById('power-msg').textContent = t === 'ice' ? 'CONGELADO!' : 'GOSMA!';
+      document.getElementById('power-sub').textContent = `${quem.toUpperCase()} ATACOU VOCÊ!`;
+      if (t === 'ice') setTimeout(() => o.classList.remove('power-active'), 4000);
     }
-
-    function updateHUD() {
-      document.getElementById('hud-hits').textContent = hits;
-      document.getElementById('hud-errs').textContent = misses;
-      const total = hits + misses;
-      document.getElementById('hud-acc').textContent = total > 0 ? `${Math.round(hits / total * 100)}%` : '–';
-    }
-
-    function updateProgress() {
-      const pct = (current / shuffled.length) * 100;
-      document.getElementById('progress-bar').style.width = pct + '%';
-      document.getElementById('prog-label').textContent = `${current} / ${shuffled.length}`;
-    }
-
-    function setButtons(disabled) {
-      const buttons = document.querySelectorAll('.btn-choice');
-      buttons.forEach(btn => btn.disabled = disabled);
-    }
-
-
-    /* ══════════════════════════════════════════════
-       END GAME
-    ══════════════════════════════════════════════ */
-    async function endGame() {
-      gameOver = true;
-      stopTimer();
-      setButtons(true);
-      updateProgress();
-
-      const total = shuffled.length;
-      const pct = Math.round(hits / total * 100);
-      const timeStr = fmtTime(elapsedSeconds);
-      let medal, color, msg;
-
-      if (pct === 100) { medal = '🏆'; color = '#ffd600'; msg = 'Perfeito! Expert confirmado!'; }
-      else if (pct >= 80) { medal = '🥇'; color = '#00e676'; msg = 'Excelente desempenho!'; }
-      else if (pct >= 60) { medal = '🥈'; color = '#00d4ff'; msg = 'Bom trabalho! Continue assim.'; }
-      else if (pct >= 40) { medal = '🥉'; color = '#ff8c00'; msg = 'Você está evoluindo!'; }
-      else { medal = '📚'; color = '#ff1744'; msg = 'Estude mais e tente novamente!'; }
-
-      // Show summary e envia automaticamente usando os dados do login
-      await Swal.fire({
-        title: `${medal} Fim de Jogo!`,
-        html: `
-      <div style="text-align:center;font-family:'Rajdhani',sans-serif;">
-        <div style="font-family:'Orbitron',sans-serif;font-size:1.1rem;color:var(--muted);margin-bottom:.5rem">${nomeAluno}</div>
-        <div style="font-family:'Orbitron',sans-serif;font-size:2.8rem;color:${color};margin:.4rem 0">${pct}%</div>
-        <div style="color:rgba(220,232,248,.7);margin-bottom:1.2rem">${msg}</div>
-        <div style="display:flex;justify-content:center;gap:2rem;margin-bottom:1.5rem">
-          <div><div style="font-size:1.6rem;color:#00e676;font-family:'Orbitron',sans-serif">${hits}</div><div style="font-size:.7rem;color:rgba(220,232,248,.4);letter-spacing:2px;text-transform:uppercase">Acertos</div></div>
-          <div><div style="font-size:1.6rem;color:#ff1744;font-family:'Orbitron',sans-serif">${misses}</div><div style="font-size:.7rem;color:rgba(220,232,248,.4);letter-spacing:2px;text-transform:uppercase">Erros</div></div>
-          <div><div style="font-size:1.6rem;color:#ffd600;font-family:'Orbitron',sans-serif">${timeStr}</div><div style="font-size:.7rem;color:rgba(220,232,248,.4);letter-spacing:2px;text-transform:uppercase">Tempo</div></div>
-        </div>
-      </div>`,
-        confirmButtonText: '📤 ENVIAR RESULTADOS',
-        confirmButtonColor: '#5c6bc0',
-        allowOutsideClick: false
-      });
-
-      await submitScore();
-    }
-
-    /* ══════════════════════════════════════════════
-       SUBMIT (Axios)
-    ══════════════════════════════════════════════ */
-    async function submitScore() {
-      const payload = {
-        aluno_id: alunoId,
-        nome: nomeAluno,
-        tema: TEMA,
-        turma: turmaAluno,
-        acertos: hits,
-        erros: misses,
-        tempo_total_segundos: elapsedSeconds,
-        respostas: respostasDadas
-      };
-
-      Swal.fire({
-        title: '📡 Enviando...',
-        html: 'Registrando sua pontuação no servidor.',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading(),
-      });
-
-      try {
-        const res = await axios.post('salvaPontuacao.php', payload);
-        const data = res.data;
-
-        const posGeral = data.posicao ? `${data.posicao}º` : '–';
-        const posTurma = data.posicao_turma ? `${data.posicao_turma}º` : '–';
-        const turmaLabel = turmaAluno ? `Turma ${escHtml(turmaAluno)}` : 'Geral';
-
-        await Swal.fire({
-          icon: 'success', iconColor: '#00e676',
-          title: '🎉 Pontuação Registrada!',
-          html: `
-        <div style="text-align:center">
-          <div style="font-family:'Orbitron',sans-serif;font-size:1rem;color:rgba(220,232,248,.6);margin-bottom:.8rem">Fim de jogo, <strong style="color:#fff">${nomeAluno}</strong>!</div>
-          <div style="display:flex;justify-content:center;gap:1.5rem;margin-bottom:1.2rem">
-            <div>
-              <div style="font-family:'Orbitron',sans-serif;font-size:2rem;color:#ffd600">${posTurma}</div>
-              <div style="font-size:.7rem;color:rgba(220,232,248,.4);letter-spacing:2px;text-transform:uppercase">${turmaLabel}</div>
-            </div>
-            <div style="width:1px;background:rgba(255,255,255,.08)"></div>
-            <div>
-              <div style="font-family:'Orbitron',sans-serif;font-size:2rem;color:rgba(220,232,248,.45)">${posGeral}</div>
-              <div style="font-size:.7rem;color:rgba(220,232,248,.3);letter-spacing:2px;text-transform:uppercase">Ranking Geral</div>
-            </div>
-          </div>
-          <div style="font-size:.82rem;color:rgba(220,232,248,.4)">
-            Acertos: <strong style="color:#00e676">${hits}</strong> &nbsp;|&nbsp;
-            Erros: <strong style="color:#ff1744">${misses}</strong> &nbsp;|&nbsp;
-            Tempo: <strong style="color:#ffd600">${fmtTime(elapsedSeconds)}</strong>
-          </div>
-        </div>`,
-          confirmButtonText: '🏆 VER RANKING',
-          confirmButtonColor: '#5c6bc0',
-          allowOutsideClick: false,
-        });
-
-        // Redirect to ranking tab
-        showAlreadyPlayedUI();
-
-      } catch (err) {
-        console.error(err);
-        Swal.fire({
-          icon: 'warning', iconColor: '#ff8c00',
-          title: '⚠️ Erro de Conexão',
-          html: 'Não foi possível salvar sua pontuação no servidor.<br><small style="color:rgba(220,232,248,.5)">Verifique se o PHP está rodando e tente novamente.</small>',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#5c6bc0',
-        });
-      }
-    }
-
-    /* ══════════════════════════════════════════════
-       RANKING
-    ══════════════════════════════════════════════ */
-    const rankingCache = {};
-
-    // Active turma filter on ranking page (can differ from URL turma)
-    let rankingTurmaFilter = TURMA; // default = current turma
-
-    function refreshActiveRanking() {
-      loadRanking('diario', true);
-      loadRanking('geral', true);
-    }
-
-    // Auto-refresh every 30 seconds
-    setInterval(() => {
-      const activePane = document.querySelector('.tab-pane.active');
-      if (activePane && (activePane.id === 'daily-pane' || activePane.id === 'all-pane')) {
-        refreshActiveRanking();
-      }
-    }, 30000);
-
-    function onTurmaFilterChange(source) {
-      const selId = source === 'all' ? 'turma-filter-all' : 'turma-filter';
-      const otherId = source === 'all' ? 'turma-filter' : 'turma-filter-all';
-
-      const sel = document.getElementById(selId);
-      const otherSel = document.getElementById(otherId);
-
-      if (sel) {
-        rankingTurmaFilter = sel.value;
-        if (otherSel) otherSel.value = sel.value; // Sincroniza o outro select
-
-        // Invalidate cache
-        delete rankingCache['diario'];
-        delete rankingCache['geral'];
-
-        refreshActiveRanking();
-      }
-    }
-
-    async function loadRanking(tipo, force = false) {
-      const contentId = tipo === 'diario' ? 'daily-content' : 'all-content';
-      const el = document.getElementById(contentId);
-
-      const cacheKey = tipo + '_' + TEMA + '_' + (rankingTurmaFilter || 'all');
-      if (!force && rankingCache[cacheKey] && (Date.now() - rankingCache[cacheKey].ts < 30000)) {
-        el.innerHTML = rankingCache[cacheKey].html;
-        return;
-      }
-
-      el.innerHTML = '<div class="rank-loading">⏳ Carregando...</div>';
-
-      try {
-        let url = `getRanking.php?tipo=${tipo}&tema=${TEMA}`;
-        if (rankingTurmaFilter) url += `&turma=${encodeURIComponent(rankingTurmaFilter)}`;
-
-        const res = await axios.get(url);
-        const data = res.data;
-
-        // Populate turma filter dropdown if we got turma list
-        if (data.turmas) populateTurmaFilter(data.turmas);
-        const rows = data.rows || data;
-
-        const html = buildRankingTable(rows);
-        rankingCache[cacheKey] = { html, ts: Date.now() };
-        el.innerHTML = html;
-      } catch (err) {
-        console.error(err);
-        el.innerHTML = `
-          <div class="rank-empty">
-            ⚠️ Não foi possível carregar o ranking.<br>
-            <small>Verifique se o servidor PHP está ativo.</small>
-          </div>`;
-      }
-    }
-
-    function populateTurmaFilter(turmas) {
-      const sel = document.getElementById('turma-filter');
-      if (!sel) return;
-      const current = sel.value;
-      sel.innerHTML = '<option value="">Todas as turmas</option>';
-      turmas.forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t; opt.textContent = `Turma ${t}`;
-        if (t === current) opt.selected = true;
-        sel.appendChild(opt);
-      });
-      // Pre-select current turma if URL param set
-      if (!current && TURMA) sel.value = TURMA;
-    }
-
-    function buildRankingTable(rows) {
-      if (!rows || rows.length === 0) {
-        return '<div class="rank-empty">📭 Nenhuma pontuação registrada ainda.</div>';
-      }
-
-      const thead = `
-    <thead><tr>
-      <th>#</th>
-      <th>Nome</th>
-      <th>Acertos</th>
-      <th>Erros</th>
-      <th>Tempo</th>
-    </tr></thead>`;
-
-      const tbody = rows.map((r, i) => {
-        const pos = i + 1;
-        const cls = pos === 1 ? 'pos-1' : pos === 2 ? 'pos-2' : pos === 3 ? 'pos-3' : 'pos-n';
-        const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : '';
-        const tempo = fmtTime(parseInt(r.tempo_total_segundos || 0));
-        return `
-      <tr>
-        <td><span class="rank-pos ${cls}">${medal || pos}</span></td>
-        <td>${escHtml(r.nome)}</td>
-        <td class="td-acertos">${r.acertos}</td>
-        <td class="td-erros">${r.erros}</td>
-        <td class="td-tempo">${tempo}</td>
-      </tr>`;
-      }).join('');
-
-      return `<table>${thead}<tbody>${tbody}</tbody></table>`;
-    }
-
-    function escHtml(str) {
-      return String(str)
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-
-    /* ══════════════════════════════════════════════
-       INIT
-    ══════════════════════════════════════════════ */
-    window.addEventListener('DOMContentLoaded', () => {
-      updateHeaderInfo();
-      prepGame(); // shuffle + load first question
-      showInstructions(); // Mostra as instruções ao abrir
-    });
-
-    /* ── Show Instructions on Load ── */
-    async function showInstructions() {
-      const temaFormatado = TEMA.replace(/_/g, ' ').toUpperCase();
-      
-      await Swal.fire({
-        title: `⚡ BEM-VINDO AO DESAFIO: ${temaFormatado}`,
-        html: `
-          <div style="text-align:left; font-family:'Rajdhani',sans-serif; font-size:1.05rem; line-height:1.5;">
-            <p>Olá! Prepare-se para testar seus conhecimentos. Aqui estão as regras:</p>
-            <ul style="color:var(--hw); margin-bottom:1.2rem;">
-              <li><strong>Foco no Aprendizado:</strong> Após cada resposta, leia a explicação detalhada com calma. O objetivo é que você aprenda o conteúdo!</li>
-              <li><strong>Objetivo:</strong> Tente acertar o máximo possível de questões.</li>
-              <li><strong>Interação:</strong> Use os botões dinâmicos abaixo do card para responder cada item.</li>
-            </ul>
-            <p style="text-align:center; color:var(--sw); font-weight:600; letter-spacing:1px;">O quiz entrará em TELA CHEIA para melhor experiência.</p>
-          </div>`,
-        confirmButtonText: 'PROSSEGUIR PARA IDENTIFICAÇÃO ›',
-        confirmButtonColor: '#5c6bc0',
-        allowOutsideClick: false,
-        background: '#0d1117',
-        showClass: { popup: 'swal2-show' }
-      });
-
-      promptLogin();
-    }
-
-    /* ── Prompt Login & Validation ── */
-    async function promptLogin() {
-      const { value: formValues } = await Swal.fire({
-        title: '📝 Identifique-se',
-        html: `
-          <div style="text-align:left; font-size:0.9rem; color:var(--muted); margin-bottom:10px;">Insira seus dados conforme cadastrado pelo professor:</div>
-          <input id="swal-nome" class="swal2-input" placeholder="Seu nome completo" style="margin-bottom:15px; width:80%;">
-          <input id="swal-turma" class="swal2-input" placeholder="Sua turma (Ex: INFO-1A)" style="width:80%;" value="${TURMA}" ${TURMA ? 'readonly' : ''}>
-          ${TURMA ? '<div style="font-size:0.7rem; color:var(--hw); margin-top:5px;">Turma detectada via link: ' + TURMA + '</div>' : ''}
-        `,
-        focusConfirm: false,
-        allowOutsideClick: false, // Bloqueia clique fora
-        allowEscapeKey: false,    // BLOQUEIA TECLA ESC
-        confirmButtonText: 'VALIDAR E ENTRAR 🚀',
-        confirmButtonColor: '#5c6bc0',
-        preConfirm: () => {
-          const n = document.getElementById('swal-nome').value.trim();
-          const t = document.getElementById('swal-turma').value.trim();
-          if (!n || !t) {
-            Swal.showValidationMessage('Preencha nome e turma!');
-            return false;
-          }
-          // Validação extra: se houver turma na URL, deve ser a mesma
-          if (TURMA && t.toLowerCase() !== TURMA.toLowerCase()) {
-            Swal.showValidationMessage('A turma informada deve ser: ' + TURMA);
-            return false;
-          }
-          return { nome: n, turma: t };
-        }
-      });
-
-      if (!formValues) return;
-
-      Swal.fire({
-        title: '🔍 Validando...',
-        didOpen: () => Swal.showLoading(),
-        allowOutsideClick: false
-      });
-
-      try {
-        const payload = { ...formValues, tema: TEMA };
-        const res = await axios.post('validar_aluno.php', payload);
-        
-        if (res.data.sucesso) {
-          alunoId = res.data.aluno_id;
-          nomeAluno = formValues.nome;
-          turmaAluno = formValues.turma;
-          
-          Swal.fire({
-            icon: 'success',
-            title: `Bem-vindo, ${nomeAluno.split(' ')[0]}!`,
-            text: 'Tudo pronto. O desafio vai começar!',
-            timer: 1500,
-            showConfirmButton: false
-          }).then(launchGame);
-        } else {
-          // Se já fez o quiz, bloqueia e manda pro ranking
-          if (res.data.ja_fez) {
-            Swal.fire({
-              icon: 'info',
-              title: 'Acesso Restrito',
-              text: res.data.erro,
-              confirmButtonText: '🏆 VER RANKING',
-              confirmButtonColor: '#5c6bc0'
-            }).then(() => {
-              showAlreadyPlayedUI();
-            });
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Ops! Acesso negado',
-              text: res.data.erro,
-              confirmButtonText: 'TENTAR NOVAMENTE'
-            }).then(promptLogin);
-          }
-        }
-      } catch (err) {
-        Swal.fire('Erro!', 'Não foi possível conectar ao servidor.', 'error').then(promptLogin);
-      }
-    }
-
-    /* ── Play button click ── */
-    function launchGame() {
-      // Solicita modo tela cheia (permitido após o clique do SweetAlert)
-      const docEl = document.documentElement;
-      if (!document.fullscreenElement) {
-        if (docEl.requestFullscreen) {
-          docEl.requestFullscreen().catch(err => console.log("Fullscreen negado"));
-        } else if (docEl.webkitRequestFullscreen) {
-          docEl.webkitRequestFullscreen();
-        }
-      }
-
-      const overlay = document.getElementById('splash-overlay');
-      const controls = document.getElementById('game-controls');
-
-      // Se o overlay já sumiu, não faz nada
-      if (overlay.style.display === 'none' || overlay.classList.contains('hiding')) return;
-
-      // Animate overlay out
-      overlay.classList.add('hiding');
-      setTimeout(() => { overlay.style.display = 'none'; }, 400);
-
-      // Show answer buttons and ENABLE them
-      controls.classList.remove('hidden');
-      setButtons(false);
-
-      // Start timer NOW (not before)
-      startTimer();
-    }
-
-    function setButtons(disabled) {
-      const buttons = document.querySelectorAll('.btn-choice');
-      buttons.forEach(btn => btn.disabled = disabled);
-    }
+    function cleanGloop() { document.getElementById('power-overlay').classList.remove('power-active'); }
+    function setButtons(d) { document.querySelectorAll('.btn-choice').forEach(b => b.disabled = d); }
   </script>
 </body>
-
 </html>
